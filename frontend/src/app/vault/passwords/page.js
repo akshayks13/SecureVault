@@ -5,11 +5,16 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { vaultAPI } from '@/lib/api';
 import Navbar from '@/components/Navbar';
+import PasswordGenerator from '@/components/PasswordGenerator';
+import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
 
 export default function PasswordsPage() {
     const { loading, isAuthenticated } = useAuth();
     const [passwords, setPasswords] = useState([]);
+    const [filteredPasswords, setFilteredPasswords] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [showGenerator, setShowGenerator] = useState(false);
     const [formData, setFormData] = useState({ name: '', website: '', username: '', password: '' });
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -32,10 +37,27 @@ export default function PasswordsPage() {
         try {
             const response = await vaultAPI.getPasswords();
             setPasswords(response.data);
+            setFilteredPasswords(response.data);
         } catch (error) {
             console.error('Failed to fetch passwords:', error);
         }
     };
+
+    // Search filter
+    useEffect(() => {
+        if (searchQuery.trim() === '') {
+            setFilteredPasswords(passwords);
+        } else {
+            const query = searchQuery.toLowerCase();
+            setFilteredPasswords(
+                passwords.filter(pwd =>
+                    pwd.name.toLowerCase().includes(query) ||
+                    (pwd.website && pwd.website.toLowerCase().includes(query)) ||
+                    pwd.username.toLowerCase().includes(query)
+                )
+            );
+        }
+    }, [searchQuery, passwords]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -50,6 +72,7 @@ export default function PasswordsPage() {
                 formData.password
             );
             setShowModal(false);
+            setShowGenerator(false);
             setFormData({ name: '', website: '', username: '', password: '' });
             fetchPasswords();
         } catch (err) {
@@ -72,6 +95,11 @@ export default function PasswordsPage() {
 
     const togglePasswordVisibility = (id) => {
         setVisiblePasswords(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
+    const handleGeneratedPassword = (password) => {
+        setFormData({ ...formData, password });
+        setShowGenerator(false);
     };
 
     if (loading || !isAuthenticated) {
@@ -97,15 +125,31 @@ export default function PasswordsPage() {
                     </button>
                 </div>
 
-                {passwords.length === 0 ? (
+                {/* Search Bar */}
+                <div className="card" style={{ marginBottom: 'var(--space-lg)', padding: 'var(--space-md)' }}>
+                    <input
+                        type="text"
+                        className="form-input"
+                        placeholder="🔍 Search passwords by name, website, or username..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{ marginBottom: 0 }}
+                    />
+                </div>
+
+                {filteredPasswords.length === 0 ? (
                     <div className="card text-center" style={{ padding: 'var(--space-2xl)' }}>
                         <div style={{ fontSize: '4rem', marginBottom: 'var(--space-md)' }}>🔐</div>
-                        <h3>No passwords stored yet</h3>
-                        <p className="text-muted mt-sm">Click "Add Password" to store your first credential securely.</p>
+                        <h3>{passwords.length === 0 ? 'No passwords stored yet' : 'No matching passwords'}</h3>
+                        <p className="text-muted mt-sm">
+                            {passwords.length === 0
+                                ? 'Click "Add Password" to store your first credential securely.'
+                                : 'Try a different search term'}
+                        </p>
                     </div>
                 ) : (
                     <div className="vault-list">
-                        {passwords.map(pwd => (
+                        {filteredPasswords.map(pwd => (
                             <div key={pwd.id} className="vault-item">
                                 <div className="vault-item-info">
                                     <div className="vault-item-icon">🔑</div>
@@ -146,11 +190,11 @@ export default function PasswordsPage() {
 
             {/* Add Password Modal */}
             {showModal && (
-                <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
+                <div className="modal-overlay" onClick={() => { setShowModal(false); setShowGenerator(false); }}>
+                    <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
                         <div className="modal-header">
                             <h2 className="modal-title">Add Password</h2>
-                            <button className="modal-close" onClick={() => setShowModal(false)}>&times;</button>
+                            <button className="modal-close" onClick={() => { setShowModal(false); setShowGenerator(false); }}>&times;</button>
                         </div>
 
                         {error && <div className="alert alert-error">{error}</div>}
@@ -192,19 +236,37 @@ export default function PasswordsPage() {
                             </div>
 
                             <div className="form-group">
-                                <label className="form-label">Password</label>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary"
+                                        style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
+                                        onClick={() => setShowGenerator(!showGenerator)}
+                                    >
+                                        {showGenerator ? '✕ Close Generator' : '🎲 Generate'}
+                                    </button>
+                                </div>
                                 <input
-                                    type="password"
+                                    type="text"
                                     className="form-input"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     placeholder="Your password"
                                     required
+                                    style={{ marginTop: '0.5rem' }}
                                 />
+                                <PasswordStrengthMeter password={formData.password} />
                             </div>
 
+                            {showGenerator && (
+                                <div style={{ marginBottom: 'var(--space-lg)' }}>
+                                    <PasswordGenerator onSelect={handleGeneratedPassword} />
+                                </div>
+                            )}
+
                             <div className="flex gap-md">
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} style={{ flex: 1 }}>
+                                <button type="button" className="btn btn-secondary" onClick={() => { setShowModal(false); setShowGenerator(false); }} style={{ flex: 1 }}>
                                     Cancel
                                 </button>
                                 <button type="submit" className="btn btn-primary" disabled={saving} style={{ flex: 1 }}>

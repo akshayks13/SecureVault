@@ -17,7 +17,8 @@ export default function Navbar() {
 
     const isActive = (path) => pathname === path;
 
-    if (['/login', '/register', '/verify-otp'].includes(pathname)) {
+    // Don't show navbar on auth pages
+    if (['/login', '/register', '/verify-otp', '/forgot-password', '/reset-password'].includes(pathname)) {
         return null;
     }
 
@@ -44,6 +45,21 @@ export default function Navbar() {
                         <li>
                             <Link href="/vault/files" className={isActive('/vault/files') ? 'active' : ''}>
                                 Files
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href="/vault/notes" className={isActive('/vault/notes') ? 'active' : ''}>
+                                Notes
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href="/password-health" className={isActive('/password-health') ? 'active' : ''}>
+                                Health
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href="/teams" className={isActive('/teams') ? 'active' : ''}>
+                                Teams
                             </Link>
                         </li>
                         <li>

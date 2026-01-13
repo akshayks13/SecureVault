@@ -446,3 +446,226 @@ async def list_all_items(
         )
         for item in items
     ]
+
+
+# Note Models
+class NoteStoreRequest(BaseModel):
+    title: str
+    content: str
+
+
+class NoteResponse(BaseModel):
+    id: int
+    title: str
+    content: str
+    created_at: str
+
+
+# Note Routes
+@router.post("/notes", status_code=status.HTTP_201_CREATED)
+async def store_note(
+    request: NoteStoreRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Store a new secure note.
+    
+    - Encrypts note content with AES-256-GCM
+    - Computes SHA-256 hash for integrity
+    - Signs hash with RSA for authenticity
+    """
+    import json
+    note_data = json.dumps({
+        "title": request.title,
+        "content": request.content
+    }).encode()
+    
+    encrypted_b64, key_b64, iv_b64, data_hash, signature_b64 = encrypt_and_store(note_data)
+    
+    vault_item = VaultItem(
+        user_id=current_user.id,
+        type=VaultItemType.NOTE.value,
+        name=request.title,
+        encrypted_data=encrypted_b64,
+        encryption_key=key_b64,
+        iv=iv_b64,
+        hash=data_hash,
+        signature=signature_b64
+    )
+    
+    db.add(vault_item)
+    db.commit()
+    db.refresh(vault_item)
+    
+    return {"message": "Note stored securely", "id": vault_item.id}
+
+
+@router.get("/notes", response_model=List[NoteResponse])
+async def list_notes(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    List all notes for the current user.
+    """
+    import json
+    
+    items = db.query(VaultItem).filter(
+        VaultItem.user_id == current_user.id,
+        VaultItem.type == VaultItemType.NOTE.value
+    ).all()
+    
+    notes = []
+    for item in items:
+        decrypted = decrypt_and_verify(item)
+        data = json.loads(decrypted.decode())
+        
+        notes.append(NoteResponse(
+            id=item.id,
+            title=data.get("title", item.name),
+            content=data["content"],
+            created_at=item.created_at.isoformat()
+        ))
+    
+    return notes
+
+
+@router.get("/notes/{item_id}", response_model=NoteResponse)
+async def get_note(
+    item_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get a specific note."""
+    import json
+    
+    item = db.query(VaultItem).filter(
+        VaultItem.id == item_id,
+        VaultItem.user_id == current_user.id,
+        VaultItem.type == VaultItemType.NOTE.value
+    ).first()
+    
+    if not item:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    decrypted = decrypt_and_verify(item)
+    data = json.loads(decrypted.decode())
+    
+    return NoteResponse(
+        id=item.id,
+        title=data.get("title", item.name),
+        content=data["content"],
+        created_at=item.created_at.isoformat()
+    )
+
+
+@router.put("/notes/{item_id}")
+async def update_note(
+    item_id: int,
+    request: NoteStoreRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update an existing note."""
+    import json
+    
+    item = db.query(VaultItem).filter(
+        VaultItem.id == item_id,
+        VaultItem.user_id == current_user.id,
+        VaultItem.type == VaultItemType.NOTE.value
+    ).first()
+    
+    if not item:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    # Re-encrypt with new content
+    note_data = json.dumps({
+        "title": request.title,
+        "content": request.content
+    }).encode()
+    
+    encrypted_b64, key_b64, iv_b64, data_hash, signature_b64 = encrypt_and_store(note_data)
+    
+    item.name = request.title
+    item.encrypted_data = encrypted_b64
+    item.encryption_key = key_b64
+    item.iv = iv_b64
+    item.hash = data_hash
+    item.signature = signature_b64
+    
+    db.commit()
+    
+    return {"message": "Note updated"}
+
+
+@router.delete("/notes/{item_id}")
+async def delete_note(
+    item_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a note."""
+    item = db.query(VaultItem).filter(
+        VaultItem.id == item_id,
+        VaultItem.user_id == current_user.id,
+        VaultItem.type == VaultItemType.NOTE.value
+    ).first()
+    
+    if not item:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    db.delete(item)
+    db.commit()
+    
+    return {"message": "Note deleted"}
+
+
+# File Preview Route
+@router.get("/files/{item_id}/preview")
+async def preview_file(
+    item_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Preview a file (images and PDFs).
+    
+    - Returns file content inline for preview
+    - Supports images (jpg, png, gif, webp) and PDFs
+    """
+    item = db.query(VaultItem).filter(
+        VaultItem.id == item_id,
+        VaultItem.user_id == current_user.id,
+        VaultItem.type == VaultItemType.FILE.value
+    ).first()
+    
+    if not item:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # Check if file is previewable
+    import mimetypes
+    content_type, _ = mimetypes.guess_type(item.file_name)
+    
+    previewable_types = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+        'application/pdf'
+    ]
+    
+    if content_type not in previewable_types:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Preview not supported for this file type: {content_type}"
+        )
+    
+    # Decrypt and verify
+    decrypted = decrypt_and_verify(item)
+    
+    return Response(
+        content=decrypted,
+        media_type=content_type,
+        headers={
+            "Content-Disposition": f'inline; filename="{item.file_name}"'
+        }
+    )
+

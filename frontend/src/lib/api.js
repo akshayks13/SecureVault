@@ -56,6 +56,12 @@ export const authAPI = {
 
     getMe: () =>
         api.get('/auth/me'),
+
+    forgotPassword: (username) =>
+        api.post('/auth/forgot-password', { username }),
+
+    resetPassword: (username, resetToken, newPassword) =>
+        api.post('/auth/reset-password', { username, reset_token: resetToken, new_password: newPassword }),
 };
 
 // Vault API
@@ -95,9 +101,84 @@ export const vaultAPI = {
     verifyFile: (id) =>
         api.get(`/vault/files/${id}/verify`),
 
+    previewFile: (id) =>
+        api.get(`/vault/files/${id}/preview`, { responseType: 'blob' }),
+
+    // Notes
+    getNotes: () =>
+        api.get('/vault/notes'),
+
+    getNote: (id) =>
+        api.get(`/vault/notes/${id}`),
+
+    createNote: (title, content) =>
+        api.post('/vault/notes', { title, content }),
+
+    updateNote: (id, title, content) =>
+        api.put(`/vault/notes/${id}`, { title, content }),
+
+    deleteNote: (id) =>
+        api.delete(`/vault/notes/${id}`),
+
     // All items
     getAllItems: () =>
         api.get('/vault/items'),
 };
 
+// Utils API
+export const utilsAPI = {
+    generatePassword: (options = {}) =>
+        api.post('/utils/generate-password', {
+            length: options.length || 16,
+            include_uppercase: options.includeUppercase ?? true,
+            include_lowercase: options.includeLowercase ?? true,
+            include_digits: options.includeDigits ?? true,
+            include_special: options.includeSpecial ?? true,
+            exclude_ambiguous: options.excludeAmbiguous ?? false,
+        }),
+
+    checkPasswordStrength: (password) =>
+        api.post('/utils/check-password-strength', { password }),
+
+    getPasswordHealth: () =>
+        api.get('/utils/password-health'),
+};
+
+// Teams API
+export const teamsAPI = {
+    createTeam: (name, description) =>
+        api.post('/teams/', { name, description }),
+
+    getMyTeams: () =>
+        api.get('/teams/'),
+
+    getTeamMembers: (teamId) =>
+        api.get(`/teams/${teamId}/members`),
+
+    addMember: (teamId, username, role = 'member') =>
+        api.post(`/teams/${teamId}/members`, { username, role }),
+
+    removeMember: (teamId, userId) =>
+        api.delete(`/teams/${teamId}/members/${userId}`),
+
+    shareFile: (teamId, vaultItemId) =>
+        api.post(`/teams/${teamId}/share`, { vault_item_id: vaultItemId }),
+
+    getSharedFiles: (teamId) =>
+        api.get(`/teams/${teamId}/shared`),
+
+    downloadSharedFile: (teamId, itemId) =>
+        api.get(`/teams/${teamId}/shared/${itemId}/download`, {
+            responseType: 'blob',
+        }),
+
+    removeSharedFile: (teamId, itemId) =>
+        api.delete(`/teams/${teamId}/shared/${itemId}`),
+
+    deleteTeam: (teamId) =>
+        api.delete(`/teams/${teamId}`),
+};
+
 export default api;
+
+

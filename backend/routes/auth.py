@@ -172,3 +172,83 @@ async def get_me(current_user: User = Depends(get_current_user)):
     - Returns user details
     """
     return current_user
+
+
+# Forgot Password Models
+class ForgotPasswordRequest(BaseModel):
+    username: str
+
+
+class ResetPasswordRequest(BaseModel):
+    username: str
+    reset_token: str
+    new_password: str
+
+
+@router.post("/forgot-password", response_model=MessageResponse)
+async def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    """
+    Request password reset.
+    
+    - Generates a reset token (OTP)
+    - Sends token to user (simulated - printed to console)
+    """
+    # Find user
+    user = db.query(User).filter(User.username == request.username).first()
+    if not user:
+        # Don't reveal if user exists or not
+        return {"message": "If the account exists, a reset code has been sent."}
+    
+    # Generate reset token
+    reset_token = generate_otp()
+    user.reset_token = reset_token
+    user.reset_token_expiry = get_otp_expiry()
+    db.commit()
+    
+    # Simulate sending reset token
+    print("\n" + "=" * 50)
+    print(f"🔑 PASSWORD RESET TOKEN for user '{request.username}': {reset_token}")
+    print("=" * 50 + "\n")
+    
+    return {"message": "If the account exists, a reset code has been sent."}
+
+
+@router.post("/reset-password", response_model=MessageResponse)
+async def reset_password(request: ResetPasswordRequest, db: Session = Depends(get_db)):
+    """
+    Reset password with token.
+    
+    - Verifies reset token
+    - Updates password hash
+    - Clears reset token
+    """
+    # Find user
+    user = db.query(User).filter(User.username == request.username).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid reset request"
+        )
+    
+    # Verify reset token
+    if not verify_otp(request.reset_token, user.reset_token, user.reset_token_expiry):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+    
+    # Validate new password
+    if len(request.new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters"
+        )
+    
+    # Update password
+    user.password_hash = hash_password(request.new_password)
+    user.reset_token = None
+    user.reset_token_expiry = None
+    db.commit()
+    
+    return {"message": "Password has been reset successfully. You can now login."}
+
