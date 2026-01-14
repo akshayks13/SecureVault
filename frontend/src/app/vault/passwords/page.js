@@ -7,6 +7,8 @@ import { vaultAPI } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import PasswordGenerator from '@/components/PasswordGenerator';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
+import { Search, Plus, Key, Trash2, Eye, EyeOff, X, Copy, Globe, User, Clock, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PasswordsPage() {
     const { loading, isAuthenticated } = useAuth();
@@ -19,6 +21,7 @@ export default function PasswordsPage() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [visiblePasswords, setVisiblePasswords] = useState({});
+    const [copiedId, setCopiedId] = useState(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -43,7 +46,6 @@ export default function PasswordsPage() {
         }
     };
 
-    // Search filter
     useEffect(() => {
         if (searchQuery.trim() === '') {
             setFilteredPasswords(passwords);
@@ -97,6 +99,16 @@ export default function PasswordsPage() {
         setVisiblePasswords(prev => ({ ...prev, [id]: !prev[id] }));
     };
 
+    const copyToClipboard = async (text, id) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopiedId(id);
+            setTimeout(() => setCopiedId(null), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    };
+
     const handleGeneratedPassword = (password) => {
         setFormData({ ...formData, password });
         setShowGenerator(false);
@@ -104,179 +116,271 @@ export default function PasswordsPage() {
 
     if (loading || !isAuthenticated) {
         return (
-            <div className="flex-center" style={{ minHeight: '100vh' }}>
-                <span className="spinner" style={{ width: 40, height: 40 }}></span>
+            <div className="flex items-center justify-center min-h-screen bg-background">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
 
     return (
-        <div>
+        <div className="min-h-screen bg-background">
             <Navbar />
 
-            <main className="container dashboard">
-                <div className="dashboard-header">
+            <main className="container mx-auto px-4 py-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="dashboard-title">Password Vault</h1>
-                        <p className="text-muted">Securely stored with AES-256 encryption</p>
+                        <h1 className="text-3xl font-bold mb-2">Password Vault</h1>
+                        <p className="text-muted-foreground">Securely stored with AES-256 encryption</p>
                     </div>
-                    <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-                        + Add Password
+                    <button
+                        onClick={() => setShowModal(true)}
+                        className="btn-primary flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-medium shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95"
+                    >
+                        <Plus className="w-5 h-5" />
+                        Add Password
                     </button>
                 </div>
 
-                {/* Search Bar */}
-                <div className="card" style={{ marginBottom: 'var(--space-lg)', padding: 'var(--space-md)' }}>
+                <div className="relative mb-6">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                         type="text"
-                        className="form-input"
-                        placeholder="🔍 Search passwords by name, website, or username..."
+                        className="w-full bg-card border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-muted-foreground/50"
+                        placeholder="Search passwords by name, website, or username..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ marginBottom: 0 }}
                     />
                 </div>
 
                 {filteredPasswords.length === 0 ? (
-                    <div className="card text-center" style={{ padding: 'var(--space-2xl)' }}>
-                        <div style={{ fontSize: '4rem', marginBottom: 'var(--space-md)' }}>🔐</div>
-                        <h3>{passwords.length === 0 ? 'No passwords stored yet' : 'No matching passwords'}</h3>
-                        <p className="text-muted mt-sm">
+                    <div className="text-center py-20 bg-card/30 rounded-2xl border border-white/5 border-dashed">
+                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-secondary mb-6">
+                            <Key className="w-10 h-10 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-xl font-medium mb-2">
+                            {passwords.length === 0 ? 'No passwords stored yet' : 'No matching passwords'}
+                        </h3>
+                        <p className="text-muted-foreground max-w-sm mx-auto mb-6">
                             {passwords.length === 0
-                                ? 'Click "Add Password" to store your first credential securely.'
-                                : 'Try a different search term'}
+                                ? 'Your vault is empty. Add your first password to keep it secure.'
+                                : 'Try adjusting your search terms to find what you looking for.'}
                         </p>
+                        {passwords.length === 0 && (
+                            <button
+                                onClick={() => setShowModal(true)}
+                                className="text-primary hover:text-primary/80 font-medium hover:underline"
+                            >
+                                Add your first password
+                            </button>
+                        )}
                     </div>
                 ) : (
-                    <div className="vault-list">
-                        {filteredPasswords.map(pwd => (
-                            <div key={pwd.id} className="vault-item">
-                                <div className="vault-item-info">
-                                    <div className="vault-item-icon">🔑</div>
-                                    <div style={{ minWidth: 0, flex: 1 }}>
-                                        <div className="vault-item-name">{pwd.name}</div>
-                                        <div className="vault-item-meta">
-                                            {pwd.website && <span>{pwd.website} • </span>}
-                                            {pwd.username}
+                    <div className="grid gap-4">
+                        <AnimatePresence>
+                            {filteredPasswords.map((pwd) => (
+                                <motion.div
+                                    key={pwd.id}
+                                    layout
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="group bg-card border border-white/5 hover:border-white/10 rounded-xl p-4 transition-all hover:shadow-lg hover:shadow-black/20"
+                                >
+                                    <div className="flex flex-col md:flex-row items-start md:items-center gap-4 justify-between">
+                                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                                            <div className="p-3 rounded-lg bg-blue-500/10 text-blue-500 shrink-0">
+                                                <Key className="w-6 h-6" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h3 className="font-semibold text-lg truncate pr-4">{pwd.name}</h3>
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <User className="w-3.5 h-3.5" />
+                                                        <span className="truncate max-w-[150px]">{pwd.username}</span>
+                                                    </div>
+                                                    {pwd.website && (
+                                                        <div className="flex items-center gap-1.5">
+                                                            <Globe className="w-3.5 h-3.5" />
+                                                            <span className="truncate max-w-[150px]">{pwd.website}</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Clock className="w-3.5 h-3.5" />
+                                                        <span>{new Date(pwd.created_at).toLocaleDateString()}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0 pl-[4.5rem] md:pl-0">
+                                            <div className="flex-1 md:flex-none relative group/pass">
+                                                <div className="bg-secondary/50 rounded-lg px-3 py-2 min-w-[140px] font-mono text-sm flex items-center justify-between border border-transparent group-hover/pass:border-white/10 transition-colors">
+                                                    <span>
+                                                        {visiblePasswords[pwd.id] ? pwd.password : '••••••••••••'}
+                                                    </span>
+                                                    <div className="flex items-center gap-1 ml-2">
+                                                        <button
+                                                            onClick={() => copyToClipboard(pwd.password, pwd.id)}
+                                                            className="p-1 hover:text-primary transition-colors rounded"
+                                                            title="Copy"
+                                                        >
+                                                            {copiedId === pwd.id ? <span className="text-green-500 text-xs font-bold">✓</span> : <Copy className="w-3.5 h-3.5" />}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => togglePasswordVisibility(pwd.id)}
+                                                            className="p-1 hover:text-primary transition-colors rounded"
+                                                            title={visiblePasswords[pwd.id] ? 'Hide' : 'Show'}
+                                                        >
+                                                            {visiblePasswords[pwd.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => handleDelete(pwd.id)}
+                                                className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors ml-2"
+                                                title="Delete"
+                                            >
+                                                <Trash2 className="w-4.5 h-4.5" />
+                                            </button>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="flex gap-sm" style={{ alignItems: 'center' }}>
-                                    <div className="password-field">
-                                        <code className="password-value">
-                                            {visiblePasswords[pwd.id] ? pwd.password : '••••••••'}
-                                        </code>
-                                        <button
-                                            className="password-toggle"
-                                            onClick={() => togglePasswordVisibility(pwd.id)}
-                                            title={visiblePasswords[pwd.id] ? 'Hide' : 'Show'}
-                                        >
-                                            {visiblePasswords[pwd.id] ? '👁️' : '👁️‍🗨️'}
-                                        </button>
-                                    </div>
-                                    <button
-                                        className="btn btn-danger"
-                                        onClick={() => handleDelete(pwd.id)}
-                                        style={{ padding: '0.4rem 0.8rem' }}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
                     </div>
                 )}
             </main>
 
             {/* Add Password Modal */}
-            {showModal && (
-                <div className="modal-overlay" onClick={() => { setShowModal(false); setShowGenerator(false); }}>
-                    <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
-                        <div className="modal-header">
-                            <h2 className="modal-title">Add Password</h2>
-                            <button className="modal-close" onClick={() => { setShowModal(false); setShowGenerator(false); }}>&times;</button>
-                        </div>
-
-                        {error && <div className="alert alert-error">{error}</div>}
-
-                        <form onSubmit={handleSubmit}>
-                            <div className="form-group">
-                                <label className="form-label">Label / Name</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="e.g., Gmail, Netflix"
-                                    required
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">Website (optional)</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={formData.website}
-                                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                                    placeholder="e.g., gmail.com"
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label className="form-label">Username / Email</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={formData.username}
-                                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                    placeholder="Your username or email"
-                                    required
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
-                                    <button
-                                        type="button"
-                                        className="btn btn-secondary"
-                                        style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem' }}
-                                        onClick={() => setShowGenerator(!showGenerator)}
-                                    >
-                                        {showGenerator ? '✕ Close Generator' : '🎲 Generate'}
-                                    </button>
-                                </div>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    placeholder="Your password"
-                                    required
-                                    style={{ marginTop: '0.5rem' }}
-                                />
-                                <PasswordStrengthMeter password={formData.password} />
-                            </div>
-
-                            {showGenerator && (
-                                <div style={{ marginBottom: 'var(--space-lg)' }}>
-                                    <PasswordGenerator onSelect={handleGeneratedPassword} />
-                                </div>
-                            )}
-
-                            <div className="flex gap-md">
-                                <button type="button" className="btn btn-secondary" onClick={() => { setShowModal(false); setShowGenerator(false); }} style={{ flex: 1 }}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="btn btn-primary" disabled={saving} style={{ flex: 1 }}>
-                                    {saving ? <span className="spinner"></span> : 'Save Password'}
+            <AnimatePresence>
+                {showModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => { setShowModal(false); setShowGenerator(false); }}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-lg bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                        >
+                            <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-card z-10">
+                                <h2 className="text-xl font-bold">Add New Password</h2>
+                                <button
+                                    onClick={() => { setShowModal(false); setShowGenerator(false); }}
+                                    className="p-2 hover:bg-white/5 rounded-full transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
-                        </form>
+
+                            <div className="p-6 overflow-y-auto custom-scrollbar">
+                                {error && (
+                                    <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
+                                        {error}
+                                    </div>
+                                )}
+
+                                <form onSubmit={handleSubmit} className="space-y-5">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-muted-foreground">Label / Name</label>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            placeholder="e.g., Netflix, Gmail"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-muted-foreground">Website (Optional)</label>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                            value={formData.website}
+                                            onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                                            placeholder="e.g., netflix.com"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-muted-foreground">Username / Email</label>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                            value={formData.username}
+                                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                            placeholder="user@example.com"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-sm font-medium text-muted-foreground">Password</label>
+                                            <button
+                                                type="button"
+                                                className="text-xs font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                                                onClick={() => setShowGenerator(!showGenerator)}
+                                            >
+                                                {showGenerator ? 'Close Generator' : 'Suggest Strong Password'}
+                                            </button>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-2.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                            value={formData.password}
+                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            placeholder="Enter password"
+                                            required
+                                        />
+                                        <PasswordStrengthMeter password={formData.password} />
+                                    </div>
+
+                                    <AnimatePresence>
+                                        {showGenerator && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="pt-2 pb-4">
+                                                    <PasswordGenerator onSelect={handleGeneratedPassword} />
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    <div className="flex gap-3 pt-2">
+                                        <button
+                                            type="button"
+                                            className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors font-medium"
+                                            onClick={() => { setShowModal(false); setShowGenerator(false); }}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="flex-1 bg-primary text-primary-foreground rounded-lg px-4 py-2.5 font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                                            disabled={saving}
+                                        >
+                                            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Password'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </motion.div>
                     </div>
-                </div>
-            )}
+                )}
+            </AnimatePresence>
         </div>
     );
 }

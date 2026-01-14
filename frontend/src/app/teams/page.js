@@ -5,6 +5,26 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { teamsAPI, vaultAPI } from '@/lib/api';
 import Navbar from '@/components/Navbar';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    Users,
+    UserPlus,
+    UserMinus,
+    Share2,
+    Trash2,
+    FileText,
+    Download,
+    Plus,
+    X,
+    Loader2,
+    Shield,
+    ShieldCheck,
+    ShieldAlert,
+    MoreVertical,
+    Search,
+    User,
+    File
+} from 'lucide-react';
 
 export default function TeamsPage() {
     const { loading: authLoading, isAuthenticated } = useAuth();
@@ -39,6 +59,14 @@ export default function TeamsPage() {
             fetchTeams();
         }
     }, [isAuthenticated]);
+
+    // Clear success message after 3 seconds
+    useEffect(() => {
+        if (success) {
+            const timer = setTimeout(() => setSuccess(''), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [success]);
 
     const fetchTeams = async () => {
         try {
@@ -178,8 +206,8 @@ export default function TeamsPage() {
 
     if (authLoading || loading) {
         return (
-            <div className="flex-center" style={{ minHeight: '100vh' }}>
-                <span className="spinner" style={{ width: 40, height: 40 }}></span>
+            <div className="flex items-center justify-center min-h-screen bg-background">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
@@ -187,302 +215,456 @@ export default function TeamsPage() {
     if (!isAuthenticated) return null;
 
     return (
-        <div>
+        <div className="min-h-screen bg-background pb-12">
             <Navbar />
 
-            <main className="container dashboard">
-                <div className="dashboard-header">
+            <main className="container mx-auto px-4 py-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="dashboard-title">Teams</h1>
-                        <p className="text-muted">Share encrypted files with your team</p>
+                        <h1 className="text-3xl font-bold mb-2">Teams</h1>
+                        <p className="text-muted-foreground">Share encrypted files with your team securely</p>
                     </div>
-                    <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
-                        + Create Team
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="btn-primary flex items-center gap-2"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Create Team
                     </button>
                 </div>
 
-                {/* Role Legend */}
-                <div className="card" style={{ marginBottom: 'var(--space-lg)', padding: 'var(--space-md)' }}>
-                    <strong>Role Permissions:</strong>
-                    <ul style={{ margin: 0, paddingLeft: 'var(--space-lg)', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                        <li><strong>Owner:</strong> Add/remove members, share files, view/download</li>
-                        <li><strong>Admin:</strong> Share files, view/download</li>
-                        <li><strong>Member:</strong> View and download files only</li>
+                {/* Role Legend mobile/accordion could be better, but keeping simple for now */}
+                <div className="mb-8 p-4 rounded-xl bg-secondary/20 border border-white/5 text-sm">
+                    <strong className="text-foreground">Role Permissions:</strong>
+                    <ul className="mt-2 space-y-1 text-muted-foreground list-disc list-inside">
+                        <li><strong className="text-emerald-500">Owner:</strong> Full access (manage members, delete team, share files)</li>
+                        <li><strong className="text-blue-500">Admin:</strong> Share files, view/download</li>
+                        <li><strong className="text-muted-foreground">Member:</strong> View and download files only</li>
                     </ul>
                 </div>
 
-                {error && <div className="alert alert-error">{error}</div>}
-                {success && <div className="alert alert-success">{success}</div>}
+                <AnimatePresence mode="wait">
+                    {error && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium"
+                        >
+                            {error}
+                        </motion.div>
+                    )}
+                    {success && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mb-6 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium"
+                        >
+                            {success}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 'var(--space-xl)', alignItems: 'start' }}>
-                    {/* Teams List */}
-                    <div className="card">
-                        <h3 style={{ marginBottom: 'var(--space-lg)' }}>My Teams</h3>
-                        {teams.length === 0 ? (
-                            <p className="text-muted">No teams yet. Create one!</p>
-                        ) : (
-                            <div className="vault-list" style={{ border: 'none', background: 'transparent' }}>
-                                {teams.map(team => (
-                                    <div
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+                    {/* Teams List (Left Sidebar) */}
+                    <div className="lg:col-span-1 space-y-4">
+                        <h3 className="text-lg font-semibold px-2">My Teams</h3>
+                        <div className="space-y-2">
+                            {teams.length === 0 ? (
+                                <div className="text-center p-8 bg-card border border-white/10 rounded-xl">
+                                    <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                                    <p className="text-sm text-muted-foreground">No teams yet</p>
+                                </div>
+                            ) : (
+                                teams.map(team => (
+                                    <motion.div
                                         key={team.id}
-                                        className={`vault-item ${selectedTeam?.id === team.id ? 'active' : ''}`}
                                         onClick={() => selectTeam(team)}
-                                        style={{ cursor: 'pointer', borderRadius: 'var(--radius-sm)' }}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedTeam?.id === team.id ? 'bg-primary/20 border-primary/50 shadow-lg shadow-primary/10' : 'bg-card border-white/10 hover:border-white/20'}`}
                                     >
-                                        <div className="vault-item-info">
-                                            <div className="vault-item-icon">👥</div>
-                                            <div>
-                                                <div className="vault-item-name">{team.name}</div>
-                                                <div className="vault-item-meta">
-                                                    {team.member_count} member(s) • {team.my_role}
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-secondary/50">
+                                                <Users className="w-5 h-5 text-primary" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-medium truncate">{team.name}</div>
+                                                <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                                    <span>{team.member_count} members</span>
+                                                    <span>•</span>
+                                                    <span className="capitalize text-primary/80">{team.my_role}</span>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                                    </motion.div>
+                                ))
+                            )}
+                        </div>
                     </div>
 
-                    {/* Team Details */}
-                    {selectedTeam ? (
-                        <div>
-                            <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                                    <div>
-                                        <h2>{selectedTeam.name}</h2>
-                                        <p className="text-muted">{selectedTeam.description || 'No description'}</p>
-                                        <span className="badge" style={{ marginTop: 'var(--space-sm)' }}>
-                                            Your role: {selectedTeam.my_role}
-                                        </span>
-                                    </div>
-                                    {isOwner && (
-                                        <button className="btn btn-danger" onClick={handleDeleteTeam}>
-                                            Delete Team
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Members */}
-                            <div className="card" style={{ marginBottom: 'var(--space-lg)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-                                    <h3>Members ({members.length})</h3>
-                                    {canManageMembers && (
-                                        <button className="btn btn-secondary" onClick={() => setShowAddMemberModal(true)}>
-                                            + Add Member
-                                        </button>
-                                    )}
-                                </div>
-                                <div className="vault-list" style={{ border: 'none', background: 'transparent' }}>
-                                    {members.map(member => (
-                                        <div key={member.id} className="vault-item">
-                                            <div className="vault-item-info">
-                                                <div className="vault-item-icon">👤</div>
-                                                <div>
-                                                    <div className="vault-item-name">{member.username}</div>
-                                                    <div className="vault-item-meta" style={{ textTransform: 'capitalize' }}>
-                                                        {member.role}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {canManageMembers && member.role !== 'owner' && (
-                                                <button
-                                                    className="btn btn-danger"
-                                                    style={{ padding: '0.3rem 0.6rem' }}
-                                                    onClick={() => handleRemoveMember(member.user_id)}
-                                                >
-                                                    Remove
-                                                </button>
-                                            )}
+                    {/* Team Details (Main Content) */}
+                    <div className="lg:col-span-3">
+                        {selectedTeam ? (
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="space-y-6"
+                            >
+                                {/* Header Card */}
+                                <div className="bg-card border border-white/10 rounded-xl p-6 relative overflow-hidden">
+                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
+                                        <div>
+                                            <h2 className="text-2xl font-bold mb-1">{selectedTeam.name}</h2>
+                                            <p className="text-muted-foreground">{selectedTeam.description || 'No description provided'}</p>
                                         </div>
-                                    ))}
+                                        {isOwner && (
+                                            <button
+                                                onClick={handleDeleteTeam}
+                                                className="btn-danger flex items-center gap-2 text-sm px-3 py-2"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                                Delete Team
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* Shared Files */}
-                            <div className="card">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-                                    <h3>Shared Files ({sharedFiles.length})</h3>
-                                    {canShareFiles && (
-                                        <button className="btn btn-primary" onClick={openShareModal}>
-                                            + Share File
-                                        </button>
-                                    )}
-                                </div>
-                                {sharedFiles.length === 0 ? (
-                                    <p className="text-muted">No shared files yet.</p>
-                                ) : (
-                                    <div className="vault-list" style={{ border: 'none', background: 'transparent' }}>
-                                        {sharedFiles.map(file => (
-                                            <div key={file.id} className="vault-item">
-                                                <div className="vault-item-info">
-                                                    <div className="vault-item-icon">📄</div>
+                                {/* Members Section */}
+                                <div className="bg-card border border-white/10 rounded-xl overflow-hidden">
+                                    <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                                        <h3 className="font-semibold text-lg flex items-center gap-2">
+                                            <Users className="w-5 h-5 text-primary" />
+                                            Team Members
+                                            <span className="bg-secondary/50 text-xs px-2 py-0.5 rounded-full text-muted-foreground">{members.length}</span>
+                                        </h3>
+                                        {canManageMembers && (
+                                            <button
+                                                onClick={() => setShowAddMemberModal(true)}
+                                                className="btn-secondary text-sm px-3 py-2 flex items-center gap-2"
+                                            >
+                                                <UserPlus className="w-4 h-4" />
+                                                Add Member
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="divide-y divide-white/5">
+                                        {members.map(member => (
+                                            <div key={member.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary/20 to-blue-500/20 flex items-center justify-center text-primary font-bold text-lg">
+                                                        {member.username.charAt(0).toUpperCase()}
+                                                    </div>
                                                     <div>
-                                                        <div className="vault-item-name">{file.name}</div>
-                                                        <div className="vault-item-meta">
-                                                            {file.file_name} • Shared by {file.shared_by_username}
+                                                        <div className="font-medium">{member.username}</div>
+                                                        <div className={`text-xs px-2 py-0.5 rounded-full inline-block mt-1 ${member.role === 'owner' ? 'bg-emerald-500/10 text-emerald-500' : member.role === 'admin' ? 'bg-blue-500/10 text-blue-500' : 'bg-secondary text-muted-foreground'}`}>
+                                                            {member.role}
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-sm">
+
+                                                {canManageMembers && member.role !== 'owner' && (
                                                     <button
-                                                        className="btn btn-primary"
-                                                        style={{ padding: '0.3rem 0.6rem' }}
-                                                        onClick={() => handleDownloadFile(file)}
+                                                        onClick={() => handleRemoveMember(member.user_id)}
+                                                        className="p-2 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-lg transition-colors"
+                                                        title="Remove Member"
                                                     >
-                                                        ⬇️ Download
+                                                        <UserMinus className="w-4 h-4" />
                                                     </button>
-                                                    {canShareFiles && (
-                                                        <button
-                                                            className="btn btn-danger"
-                                                            style={{ padding: '0.3rem 0.6rem' }}
-                                                            onClick={() => handleRemoveSharedFile(file.id)}
-                                                        >
-                                                            Remove
-                                                        </button>
-                                                    )}
-                                                </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
-                                )}
+                                </div>
+
+                                {/* Shared Files Section */}
+                                <div className="bg-card border border-white/10 rounded-xl overflow-hidden">
+                                    <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                                        <h3 className="font-semibold text-lg flex items-center gap-2">
+                                            <Share2 className="w-5 h-5 text-primary" />
+                                            Shared Files
+                                            <span className="bg-secondary/50 text-xs px-2 py-0.5 rounded-full text-muted-foreground">{sharedFiles.length}</span>
+                                        </h3>
+                                        {canShareFiles && (
+                                            <button
+                                                onClick={openShareModal}
+                                                className="btn-primary text-sm px-3 py-2 flex items-center gap-2"
+                                            >
+                                                <Plus className="w-4 h-4" />
+                                                Share File
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {sharedFiles.length === 0 ? (
+                                        <div className="p-8 text-center text-muted-foreground">
+                                            <FileText className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                                            <p>No files have been shared with this team yet.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="divide-y divide-white/5">
+                                            {sharedFiles.map(file => (
+                                                <div key={file.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors group">
+                                                    <div className="flex items-center gap-3 overflow-hidden">
+                                                        <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                                                            <FileText className="w-5 h-5" />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <div className="font-medium truncate">{file.name}</div>
+                                                            <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                                                <span className="truncate">{file.file_name}</span>
+                                                                <span>•</span>
+                                                                <span>Shared by {file.shared_by_username}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => handleDownloadFile(file)}
+                                                            className="p-2 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-lg transition-colors"
+                                                            title="Download"
+                                                        >
+                                                            <Download className="w-4 h-4" />
+                                                        </button>
+                                                        {canShareFiles && (
+                                                            <button
+                                                                onClick={() => handleRemoveSharedFile(file.id)}
+                                                                className="p-2 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-lg transition-colors"
+                                                                title="Remove Share"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center p-12 text-center bg-card/50 border border-white/5 rounded-xl border-dashed">
+                                <div className="w-24 h-24 bg-secondary/30 rounded-full flex items-center justify-center mb-6">
+                                    <Users className="w-10 h-10 text-muted-foreground opacity-50" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-2">Select a Team</h3>
+                                <p className="text-muted-foreground max-w-sm mx-auto mb-6">
+                                    Select a team from the sidebar to view members and shared files, or create a new team to get started.
+                                </p>
+                                <button onClick={() => setShowCreateModal(true)} className="btn-primary">
+                                    Create New Team
+                                </button>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="card text-center" style={{ padding: 'var(--space-2xl)' }}>
-                            <div style={{ fontSize: '4rem', marginBottom: 'var(--space-lg)' }}>👥</div>
-                            <h3>Select a team</h3>
-                            <p className="text-muted">Choose a team from the list or create a new one.</p>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </main>
 
             {/* Create Team Modal */}
-            {showCreateModal && (
-                <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2 className="modal-title">Create Team</h2>
-                            <button className="modal-close" onClick={() => setShowCreateModal(false)}>&times;</button>
-                        </div>
-                        <form onSubmit={handleCreateTeam}>
-                            <div className="form-group">
-                                <label className="form-label">Team Name</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={newTeamName}
-                                    onChange={(e) => setNewTeamName(e.target.value)}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Description (optional)</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={newTeamDesc}
-                                    onChange={(e) => setNewTeamDesc(e.target.value)}
-                                />
-                            </div>
-                            <div className="flex gap-md">
-                                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowCreateModal(false)}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
-                                    Create
+            <AnimatePresence>
+                {showCreateModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                        onClick={() => setShowCreateModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-card border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                                <h2 className="text-xl font-bold">Create Team</h2>
+                                <button onClick={() => setShowCreateModal(false)} className="text-muted-foreground hover:text-foreground">
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                            <form onSubmit={handleCreateTeam} className="p-6 space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-muted-foreground">Team Name</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-secondary/50 border border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                        value={newTeamName}
+                                        onChange={(e) => setNewTeamName(e.target.value)}
+                                        placeholder="e.g. Engineering"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-muted-foreground">Description (optional)</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-secondary/50 border border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                        value={newTeamDesc}
+                                        onChange={(e) => setNewTeamDesc(e.target.value)}
+                                        placeholder="Brief checks..."
+                                    />
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowCreateModal(false)}
+                                        className="flex-1 btn-secondary"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 btn-primary"
+                                    >
+                                        Create Team
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Add Member Modal */}
-            {showAddMemberModal && (
-                <div className="modal-overlay" onClick={() => setShowAddMemberModal(false)}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2 className="modal-title">Add Member</h2>
-                            <button className="modal-close" onClick={() => setShowAddMemberModal(false)}>&times;</button>
-                        </div>
-                        <form onSubmit={handleAddMember}>
-                            <div className="form-group">
-                                <label className="form-label">Username</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={newMemberUsername}
-                                    onChange={(e) => setNewMemberUsername(e.target.value)}
-                                    placeholder="Enter username"
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Role</label>
-                                <select
-                                    className="form-input"
-                                    value={newMemberRole}
-                                    onChange={(e) => setNewMemberRole(e.target.value)}
-                                >
-                                    <option value="member">Member (view/download only)</option>
-                                    <option value="admin">Admin (can share files)</option>
-                                </select>
-                            </div>
-                            <div className="flex gap-md">
-                                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowAddMemberModal(false)}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
-                                    Add
+            <AnimatePresence>
+                {showAddMemberModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                        onClick={() => setShowAddMemberModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-card border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                                <h2 className="text-xl font-bold">Add Member</h2>
+                                <button onClick={() => setShowAddMemberModal(false)} className="text-muted-foreground hover:text-foreground">
+                                    <X className="w-5 h-5" />
                                 </button>
                             </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                            <form onSubmit={handleAddMember} className="p-6 space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-muted-foreground">Username</label>
+                                    <div className="relative">
+                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                        <input
+                                            type="text"
+                                            className="w-full bg-secondary/50 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                            value={newMemberUsername}
+                                            onChange={(e) => setNewMemberUsername(e.target.value)}
+                                            placeholder="Enter username"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-muted-foreground">Role</label>
+                                    <select
+                                        className="w-full bg-secondary/50 border border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none"
+                                        value={newMemberRole}
+                                        onChange={(e) => setNewMemberRole(e.target.value)}
+                                    >
+                                        <option value="member">Member (view/download only)</option>
+                                        <option value="admin">Admin (can share files)</option>
+                                    </select>
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowAddMemberModal(false)}
+                                        className="flex-1 btn-secondary"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 btn-primary"
+                                    >
+                                        Add Member
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Share File Modal */}
-            {showShareModal && (
-                <div className="modal-overlay" onClick={() => setShowShareModal(false)}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2 className="modal-title">Share File with Team</h2>
-                            <button className="modal-close" onClick={() => setShowShareModal(false)}>&times;</button>
-                        </div>
-                        <form onSubmit={handleShareFile}>
-                            <div className="form-group">
-                                <label className="form-label">Select File to Share</label>
-                                {myFiles.length === 0 ? (
-                                    <p className="text-muted">You have no files in your vault. Upload files first.</p>
-                                ) : (
-                                    <select
-                                        className="form-input"
-                                        value={selectedFileToShare}
-                                        onChange={(e) => setSelectedFileToShare(e.target.value)}
-                                        required
+            <AnimatePresence>
+                {showShareModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                        onClick={() => setShowShareModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-card border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                                <h2 className="text-xl font-bold">Share File</h2>
+                                <button onClick={() => setShowShareModal(false)} className="text-muted-foreground hover:text-foreground">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <form onSubmit={handleShareFile} className="p-6 space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-muted-foreground">Select File</label>
+                                    {myFiles.length === 0 ? (
+                                        <div className="p-4 rounded-xl bg-secondary/50 text-center text-sm text-muted-foreground">
+                                            You have no files in your vault. Upload files first.
+                                        </div>
+                                    ) : (
+                                        <div className="relative">
+                                            <File className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                            <select
+                                                className="w-full bg-secondary/50 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none"
+                                                value={selectedFileToShare}
+                                                onChange={(e) => setSelectedFileToShare(e.target.value)}
+                                                required
+                                            >
+                                                <option value="">Select a file...</option>
+                                                {myFiles.map(file => (
+                                                    <option key={file.id} value={file.id}>{file.name} ({file.file_name})</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowShareModal(false)}
+                                        className="flex-1 btn-secondary"
                                     >
-                                        <option value="">Select a file...</option>
-                                        {myFiles.map(file => (
-                                            <option key={file.id} value={file.id}>{file.name} ({file.file_name})</option>
-                                        ))}
-                                    </select>
-                                )}
-                            </div>
-                            <div className="flex gap-md">
-                                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowShareModal(false)}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={myFiles.length === 0}>
-                                    Share
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 btn-primary"
+                                        disabled={myFiles.length === 0}
+                                    >
+                                        Share File
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

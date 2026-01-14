@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { utilsAPI } from '@/lib/api';
+import { Copy, Check, Dices, RefreshCw } from 'lucide-react';
 
 export default function PasswordGenerator({ onSelect }) {
     const [password, setPassword] = useState('');
@@ -48,189 +49,134 @@ export default function PasswordGenerator({ onSelect }) {
     };
 
     const getStrengthColor = () => {
-        if (!strength) return 'var(--text-muted)';
+        if (!strength) return 'bg-muted';
         switch (strength.level) {
-            case 'strong': return 'var(--success)';
-            case 'good': return '#10b981';
-            case 'fair': return 'var(--warning)';
-            default: return 'var(--error)';
+            case 'strong': return 'bg-emerald-500';
+            case 'good': return 'bg-green-500';
+            case 'fair': return 'bg-yellow-500';
+            default: return 'bg-red-500';
         }
     };
 
     return (
-        <div className="password-generator">
-            <div className="generator-result">
-                <code className="generated-password">
-                    {password || 'Click "Generate" to create a password'}
-                </code>
-                {password && (
-                    <div className="generator-actions">
-                        <button onClick={copyToClipboard} className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem' }}>
-                            {copied ? '✓ Copied' : '📋 Copy'}
-                        </button>
-                        {onSelect && (
-                            <button onClick={handleUsePassword} className="btn btn-primary" style={{ padding: '0.3rem 0.6rem' }}>
-                                Use This
+        <div className="bg-secondary/30 rounded-xl p-4 border border-white/5">
+            <div className="mb-4">
+                <div className="flex items-center gap-2 mb-2 p-3 bg-background rounded-lg border border-white/5 font-mono text-lg break-all min-h-[50px]">
+                    <span className="flex-1 opacity-90">
+                        {password || <span className="text-muted-foreground text-base font-sans">Click generate to start...</span>}
+                    </span>
+                    {password && (
+                        <div className="flex gap-1 shrink-0 ml-2">
+                            <button
+                                onClick={copyToClipboard}
+                                className="p-2 hover:bg-secondary rounded-md transition-colors text-muted-foreground hover:text-foreground"
+                                title="Copy"
+                            >
+                                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                             </button>
-                        )}
-                    </div>
+                        </div>
+                    )}
+                </div>
+
+                {password && onSelect && (
+                    <button
+                        onClick={handleUsePassword}
+                        className="w-full text-xs font-medium text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 py-1.5 rounded-md transition-colors"
+                    >
+                        Use this password
+                    </button>
                 )}
             </div>
 
             {strength && (
-                <div className="strength-display">
-                    <div className="strength-bar-bg">
+                <div className="mb-5">
+                    <div className="h-1.5 w-full bg-background rounded-full overflow-hidden mb-1.5">
                         <div
-                            className="strength-bar-fill"
-                            style={{ width: `${strength.score}%`, backgroundColor: getStrengthColor() }}
+                            className={`h-full transition-all duration-300 ${getStrengthColor()}`}
+                            style={{ width: `${strength.score}%` }}
                         />
                     </div>
-                    <span style={{ color: getStrengthColor(), textTransform: 'capitalize', fontSize: '0.85rem' }}>
-                        {strength.level} ({strength.score}/100)
-                    </span>
+                    <div className="flex justify-between text-xs">
+                        <span className="capitalize text-muted-foreground">{strength.level} Strength</span>
+                        <span className="font-medium">{strength.score}/100</span>
+                    </div>
                 </div>
             )}
 
-            <div className="generator-options">
-                <div className="option-row">
-                    <label>Length: {options.length}</label>
+            <div className="space-y-4">
+                <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                        <label className="text-muted-foreground">Length</label>
+                        <span className="font-mono">{options.length}</span>
+                    </div>
                     <input
                         type="range"
                         min="8"
                         max="64"
                         value={options.length}
                         onChange={(e) => setOptions({ ...options, length: parseInt(e.target.value) })}
-                        className="range-input"
+                        className="w-full accent-primary h-1.5 bg-background rounded-lg appearance-none cursor-pointer"
                     />
                 </div>
 
-                <div className="option-checkboxes">
-                    <label className="checkbox-label">
+                <div className="grid grid-cols-2 gap-3">
+                    <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
                         <input
                             type="checkbox"
                             checked={options.includeUppercase}
                             onChange={(e) => setOptions({ ...options, includeUppercase: e.target.checked })}
+                            className="rounded border-white/20 bg-background text-primary focus:ring-primary/50"
                         />
-                        A-Z
+                        <span>ABC</span>
                     </label>
-                    <label className="checkbox-label">
+                    <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
                         <input
                             type="checkbox"
                             checked={options.includeLowercase}
                             onChange={(e) => setOptions({ ...options, includeLowercase: e.target.checked })}
+                            className="rounded border-white/20 bg-background text-primary focus:ring-primary/50"
                         />
-                        a-z
+                        <span>abc</span>
                     </label>
-                    <label className="checkbox-label">
+                    <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
                         <input
                             type="checkbox"
                             checked={options.includeDigits}
                             onChange={(e) => setOptions({ ...options, includeDigits: e.target.checked })}
+                            className="rounded border-white/20 bg-background text-primary focus:ring-primary/50"
                         />
-                        0-9
+                        <span>123</span>
                     </label>
-                    <label className="checkbox-label">
+                    <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
                         <input
                             type="checkbox"
                             checked={options.includeSpecial}
                             onChange={(e) => setOptions({ ...options, includeSpecial: e.target.checked })}
+                            className="rounded border-white/20 bg-background text-primary focus:ring-primary/50"
                         />
-                        !@#$
+                        <span>!@#</span>
                     </label>
                 </div>
 
-                <label className="checkbox-label" style={{ marginTop: '0.5rem' }}>
+                <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors py-1">
                     <input
                         type="checkbox"
                         checked={options.excludeAmbiguous}
                         onChange={(e) => setOptions({ ...options, excludeAmbiguous: e.target.checked })}
+                        className="rounded border-white/20 bg-background text-primary focus:ring-primary/50"
                     />
-                    Exclude ambiguous characters (0O1lI)
+                    <span>Exclude ambiguous characters (0, O, 1, l, I)</span>
                 </label>
             </div>
 
             <button
                 onClick={generatePassword}
-                className="btn btn-primary"
                 disabled={loading}
-                style={{ width: '100%', marginTop: '1rem' }}
+                className="w-full mt-5 bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 border border-white/5 shadow-sm"
             >
-                {loading ? <span className="spinner"></span> : '🎲 Generate Password'}
+                {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Dices className="w-4 h-4" />}
+                Generate New Password
             </button>
-
-            <style jsx>{`
-                .password-generator {
-                    background: var(--surface-secondary);
-                    padding: 1rem;
-                    border-radius: var(--radius-md);
-                }
-                .generator-result {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.5rem;
-                    margin-bottom: 1rem;
-                }
-                .generated-password {
-                    font-family: var(--font-mono);
-                    font-size: 1rem;
-                    padding: 0.75rem;
-                    background: var(--surface);
-                    border-radius: var(--radius-sm);
-                    word-break: break-all;
-                    min-height: 2.5rem;
-                }
-                .generator-actions {
-                    display: flex;
-                    gap: 0.5rem;
-                }
-                .strength-display {
-                    margin-bottom: 1rem;
-                }
-                .strength-bar-bg {
-                    height: 4px;
-                    background: var(--surface);
-                    border-radius: 2px;
-                    overflow: hidden;
-                    margin-bottom: 0.25rem;
-                }
-                .strength-bar-fill {
-                    height: 100%;
-                    transition: width 0.3s ease;
-                }
-                .generator-options {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.75rem;
-                }
-                .option-row {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.25rem;
-                }
-                .option-row label {
-                    font-size: 0.85rem;
-                    color: var(--text-secondary);
-                }
-                .range-input {
-                    width: 100%;
-                    accent-color: var(--primary);
-                }
-                .option-checkboxes {
-                    display: flex;
-                    gap: 1rem;
-                    flex-wrap: wrap;
-                }
-                .checkbox-label {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.25rem;
-                    font-size: 0.85rem;
-                    cursor: pointer;
-                }
-                .checkbox-label input {
-                    accent-color: var(--primary);
-                }
-            `}</style>
         </div>
     );
 }

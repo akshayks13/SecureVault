@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { vaultAPI } from '@/lib/api';
 import Navbar from '@/components/Navbar';
+import { Search, Plus, FileText, Download, Eye, ShieldCheck, Trash2, X, UploadCloud, Loader2, File, Image as ImageIcon, FileCode } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FilesPage() {
     const { loading, isAuthenticated } = useAuth();
@@ -161,205 +163,294 @@ export default function FilesPage() {
         return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'pdf'].includes(ext);
     };
 
+    const getFileIcon = (fileName) => {
+        const ext = fileName.split('.').pop().toLowerCase();
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return <ImageIcon className="w-6 h-6" />;
+        if (['js', 'py', 'html', 'css', 'json'].includes(ext)) return <FileCode className="w-6 h-6" />;
+        return <FileText className="w-6 h-6" />;
+    };
+
     if (loading || !isAuthenticated) {
         return (
-            <div className="flex-center" style={{ minHeight: '100vh' }}>
-                <span className="spinner" style={{ width: 40, height: 40 }}></span>
+            <div className="flex items-center justify-center min-h-screen bg-background">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
 
     return (
-        <div>
+        <div className="min-h-screen bg-background">
             <Navbar />
 
-            <main className="container dashboard">
-                <div className="dashboard-header">
+            <main className="container mx-auto px-4 py-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="dashboard-title">File Vault</h1>
-                        <p className="text-muted">Encrypted with AES-256 + RSA digital signatures</p>
+                        <h1 className="text-3xl font-bold mb-2">File Vault</h1>
+                        <p className="text-muted-foreground">Encrypted with AES-256 + RSA digital signatures</p>
                     </div>
-                    <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-                        + Upload File
+                    <button
+                        onClick={() => setShowModal(true)}
+                        className="btn-primary flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-medium shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95"
+                    >
+                        <UploadCloud className="w-5 h-5" />
+                        Upload File
                     </button>
                 </div>
 
-                {/* Search Bar */}
-                <div className="card" style={{ marginBottom: 'var(--space-lg)', padding: 'var(--space-md)' }}>
+                <div className="relative mb-6">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                         type="text"
-                        className="form-input"
-                        placeholder="🔍 Search files by name..."
+                        className="w-full bg-card border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-muted-foreground/50"
+                        placeholder="Search files by name..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ marginBottom: 0 }}
                     />
                 </div>
 
                 {filteredFiles.length === 0 ? (
-                    <div className="card text-center" style={{ padding: 'var(--space-2xl)' }}>
-                        <div style={{ fontSize: '4rem', marginBottom: 'var(--space-md)' }}>📁</div>
-                        <h3>{files.length === 0 ? 'No files stored yet' : 'No matching files'}</h3>
-                        <p className="text-muted mt-sm">
+                    <div className="text-center py-20 bg-card/30 rounded-2xl border border-white/5 border-dashed">
+                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-secondary mb-6">
+                            <File className="w-10 h-10 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-xl font-medium mb-2">
+                            {files.length === 0 ? 'No files stored yet' : 'No matching files'}
+                        </h3>
+                        <p className="text-muted-foreground max-w-sm mx-auto mb-6">
                             {files.length === 0
-                                ? 'Click "Upload File" to encrypt and store your first file.'
-                                : 'Try a different search term'}
+                                ? 'Upload essential documents, images, or archives to keep them secure.'
+                                : 'Try adjusting your search terms.'}
                         </p>
+                        {files.length === 0 && (
+                            <button
+                                onClick={() => setShowModal(true)}
+                                className="text-primary hover:text-primary/80 font-medium hover:underline"
+                            >
+                                Upload your first file
+                            </button>
+                        )}
                     </div>
                 ) : (
-                    <div className="vault-list">
-                        {filteredFiles.map(file => (
-                            <div key={file.id} className="vault-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-md)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div className="vault-item-info">
-                                        <div className="vault-item-icon">📄</div>
-                                        <div>
-                                            <div className="vault-item-name">{file.name}</div>
-                                            <div className="vault-item-meta">
-                                                {file.file_name} • {new Date(file.created_at).toLocaleDateString()}
+                    <div className="grid gap-4">
+                        <AnimatePresence>
+                            {filteredFiles.map((file) => (
+                                <motion.div
+                                    key={file.id}
+                                    layout
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="group bg-card border border-white/5 hover:border-white/10 rounded-xl p-4 transition-all hover:shadow-lg hover:shadow-black/20"
+                                >
+                                    <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 justify-between">
+                                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                                            <div className="p-3 rounded-lg bg-yellow-500/10 text-yellow-500 shrink-0">
+                                                {getFileIcon(file.file_name)}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h3 className="font-semibold text-lg truncate pr-4">{file.name}</h3>
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
+                                                    <span className="truncate max-w-[200px]">{file.file_name}</span>
+                                                    <span>•</span>
+                                                    <span>{new Date(file.created_at).toLocaleDateString()}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="flex gap-sm">
-                                        {isPreviewable(file.file_name) && (
-                                            <button
-                                                className="btn btn-secondary"
-                                                onClick={() => handlePreview(file)}
-                                                style={{ padding: '0.4rem 0.8rem' }}
-                                            >
-                                                👁️ Preview
-                                            </button>
-                                        )}
-                                        <button
-                                            className="btn btn-primary"
-                                            onClick={() => handleDownload(file)}
-                                            style={{ padding: '0.4rem 0.8rem' }}
-                                        >
-                                            ⬇️ Download
-                                        </button>
-                                        <button
-                                            className="btn btn-secondary"
-                                            onClick={() => handleVerify(file.id)}
-                                            style={{ padding: '0.4rem 0.8rem' }}
-                                        >
-                                            ✓ Verify
-                                        </button>
-                                        <button
-                                            className="btn btn-danger"
-                                            onClick={() => handleDelete(file.id)}
-                                            style={{ padding: '0.4rem 0.8rem' }}
-                                        >
-                                            🗑️
-                                        </button>
-                                    </div>
-                                </div>
 
-                                {verificationStatus[file.id] && (
-                                    <div className={`alert ${verificationStatus[file.id].valid ? 'alert-success' : 'alert-error'}`}>
-                                        {verificationStatus[file.id].message}
+                                        <div className="flex flex-wrap items-center gap-2 mt-4 lg:mt-0 w-full lg:w-auto pl-[4.5rem] lg:pl-0">
+                                            {isPreviewable(file.file_name) && (
+                                                <button
+                                                    onClick={() => handlePreview(file)}
+                                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 text-sm font-medium transition-colors"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                    Preview
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => handleDownload(file)}
+                                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 text-sm font-medium transition-colors"
+                                            >
+                                                <Download className="w-4 h-4" />
+                                                Download
+                                            </button>
+                                            <button
+                                                onClick={() => handleVerify(file.id)}
+                                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 text-sm font-medium transition-colors"
+                                            >
+                                                <ShieldCheck className="w-4 h-4" />
+                                                Verify
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(file.id)}
+                                                className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors ml-1"
+                                                title="Delete"
+                                            >
+                                                <Trash2 className="w-4.5 h-4.5" />
+                                            </button>
+                                        </div>
                                     </div>
-                                )}
-                            </div>
-                        ))}
+
+                                    {verificationStatus[file.id] && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            className={`mt-4 p-3 rounded-lg border text-sm ${verificationStatus[file.id].valid
+                                                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                                                    : 'bg-destructive/10 border-destructive/20 text-destructive'
+                                                }`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                {verificationStatus[file.id].valid ? <ShieldCheck className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                                                {verificationStatus[file.id].message}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
                     </div>
                 )}
             </main>
 
             {/* Upload Modal */}
-            {showModal && (
-                <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2 className="modal-title">Upload File</h2>
-                            <button className="modal-close" onClick={() => setShowModal(false)}>&times;</button>
-                        </div>
-
-                        {error && <div className="alert alert-error">{error}</div>}
-
-                        <form onSubmit={handleSubmit}>
-                            <div className="form-group">
-                                <label className="form-label">File Label</label>
-                                <input
-                                    type="text"
-                                    className="form-input"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="E.g., Passport, Tax Document"
-                                    required
-                                />
+            <AnimatePresence>
+                {showModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowModal(false)}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-lg bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                                <h2 className="text-xl font-bold">Upload Secure File</h2>
+                                <button onClick={() => setShowModal(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
                             </div>
 
-                            <div className="form-group">
-                                <label className="form-label">Select File</label>
-                                <input
-                                    type="file"
-                                    className="form-input"
-                                    onChange={(e) => setFormData({ ...formData, file: e.target.files[0] })}
-                                    required
-                                />
-                                {formData.file && (
-                                    <p className="text-muted mt-sm">
-                                        Selected: {formData.file.name} ({(formData.file.size / 1024).toFixed(1)} KB)
-                                    </p>
+                            <div className="p-6">
+                                {error && (
+                                    <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
+                                        {error}
+                                    </div>
                                 )}
-                            </div>
 
-                            <div className="flex gap-md">
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary"
-                                    style={{ flex: 1 }}
-                                    onClick={() => setShowModal(false)}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="btn btn-primary"
-                                    style={{ flex: 1 }}
-                                    disabled={uploading}
-                                >
-                                    {uploading ? <span className="spinner"></span> : 'Encrypt & Upload'}
-                                </button>
+                                <form onSubmit={handleSubmit} className="space-y-5">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-muted-foreground">File Label</label>
+                                        <input
+                                            type="text"
+                                            className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            placeholder="E.g., Passport, Tax Document"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-muted-foreground">Select File</label>
+                                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary/50 hover:bg-white/5 transition-all group">
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                <p className="text-sm text-muted-foreground group-hover:text-foreground">
+                                                    <span className="font-semibold">Click to upload</span> or drag and drop
+                                                </p>
+                                            </div>
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                onChange={(e) => setFormData({ ...formData, file: e.target.files[0] })}
+                                                required
+                                            />
+                                        </label>
+                                        {formData.file && (
+                                            <div className="flex items-center gap-2 p-3 bg-secondary/30 rounded-lg border border-white/5 text-sm">
+                                                <FileText className="w-4 h-4 text-primary" />
+                                                <span className="flex-1 truncate">{formData.file.name}</span>
+                                                <span className="text-muted-foreground">({(formData.file.size / 1024).toFixed(1)} KB)</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="flex gap-3 pt-2">
+                                        <button
+                                            type="button"
+                                            className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors font-medium"
+                                            onClick={() => setShowModal(false)}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="flex-1 bg-primary text-primary-foreground rounded-lg px-4 py-2.5 font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                                            disabled={uploading}
+                                        >
+                                            {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Encrypt & Upload'}
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
+                        </motion.div>
                     </div>
-                </div>
-            )}
+                )}
+            </AnimatePresence>
 
             {/* Preview Modal */}
-            {showPreview && (
-                <div className="modal-overlay" onClick={closePreview}>
-                    <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '900px', maxHeight: '90vh' }}>
-                        <div className="modal-header">
-                            <h2 className="modal-title">Preview: {previewData.name}</h2>
-                            <button className="modal-close" onClick={closePreview}>&times;</button>
-                        </div>
-                        <div style={{
-                            overflow: 'auto',
-                            maxHeight: 'calc(90vh - 100px)',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            padding: 'var(--space-md)',
-                            backgroundColor: 'var(--surface)'
-                        }}>
-                            {previewData.type === 'pdf' ? (
-                                <iframe
-                                    src={previewData.url}
-                                    style={{ width: '100%', height: '70vh', border: 'none' }}
-                                    title="PDF Preview"
-                                />
-                            ) : (
-                                <img
-                                    src={previewData.url}
-                                    alt={previewData.name}
-                                    style={{ maxWidth: '100%', maxHeight: '70vh', objectFit: 'contain' }}
-                                />
-                            )}
-                        </div>
+            <AnimatePresence>
+                {showPreview && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={closePreview}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="relative w-full max-w-5xl h-[85vh] bg-card border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <div className="p-4 border-b border-white/10 flex items-center justify-between bg-card z-10">
+                                <h2 className="text-lg font-semibold flex items-center gap-2">
+                                    <Eye className="w-4 h-4 text-primary" />
+                                    Preview: {previewData.name}
+                                </h2>
+                                <button onClick={closePreview} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="flex-1 bg-black/20 p-4 overflow-auto flex items-center justify-center">
+                                {previewData.type === 'pdf' ? (
+                                    <iframe
+                                        src={previewData.url}
+                                        className="w-full h-full rounded-lg border border-white/10 bg-white"
+                                        title="PDF Preview"
+                                    />
+                                ) : (
+                                    <img
+                                        src={previewData.url}
+                                        alt={previewData.name}
+                                        className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                                    />
+                                )}
+                            </div>
+                        </motion.div>
                     </div>
-                </div>
-            )}
+                )}
+            </AnimatePresence>
         </div>
     );
 }
