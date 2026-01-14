@@ -6,25 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { teamsAPI, vaultAPI } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Users,
-    UserPlus,
-    UserMinus,
-    Share2,
-    Trash2,
-    FileText,
-    Download,
-    Plus,
-    X,
-    Loader2,
-    Shield,
-    ShieldCheck,
-    ShieldAlert,
-    MoreVertical,
-    Search,
-    User,
-    File
-} from 'lucide-react';
+import { Plus, Trash2, Users, FileText, Settings, X, Search, Shield, UserPlus, FileUp, MoreVertical, Check, Folder, AlertTriangle, Info, Download, Share2, File, Loader2, User } from 'lucide-react';
 
 export default function TeamsPage() {
     const { loading: authLoading, isAuthenticated } = useAuth();
@@ -34,11 +16,17 @@ export default function TeamsPage() {
     const [sharedFiles, setSharedFiles] = useState([]);
     const [myFiles, setMyFiles] = useState([]);
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+    const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [modalError, setModalError] = useState(null);
+
+    // Confirmation Modal State
+    const [memberToRemove, setMemberToRemove] = useState(null);
+    const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState(false);
     const router = useRouter();
 
     // Form states
@@ -112,25 +100,41 @@ export default function TeamsPage() {
 
     const handleAddMember = async (e) => {
         e.preventDefault();
-        setError('');
+        setModalError(null);
         try {
-            await teamsAPI.addMember(selectedTeam.id, newMemberUsername, newMemberRole);
-            setShowAddMemberModal(false);
+            if (!newMemberUsername) return;
+
+            const updatedTeam = await teamsAPI.addMember(selectedTeam.id, newMemberUsername, newMemberRole);
+            // Update the selected team's member count and then re-fetch members for the selected team
+            setTeams(teams.map(t => t.id === selectedTeam.id ? { ...t, member_count: updatedTeam.member_count } : t));
+            selectTeam(selectedTeam); // Re-fetch members and shared files for the selected team
+            setIsAddMemberModalOpen(false);
             setNewMemberUsername('');
-            selectTeam(selectedTeam);
             setSuccess('Member added!');
         } catch (err) {
-            setError(err.response?.data?.detail || 'Failed to add member');
+            setModalError(err.response?.data?.detail || 'Failed to add member. Please check the username and try again.');
         }
     };
 
-    const handleRemoveMember = async (userId) => {
-        if (!confirm('Remove this member?')) return;
+    const handleRemoveMember = (userId) => {
+        setMemberToRemove(userId);
+        setIsRemoveMemberModalOpen(true);
+    };
+
+    const confirmRemoveMember = async () => {
+        if (!memberToRemove || !selectedTeam) return;
         try {
-            await teamsAPI.removeMember(selectedTeam.id, userId);
-            selectTeam(selectedTeam);
+            await teamsAPI.removeMember(selectedTeam.id, memberToRemove);
+            // Update the selected team's member count and then re-fetch members for the selected team
+            setTeams(teams.map(t => t.id === selectedTeam.id ? { ...t, member_count: t.member_count - 1 } : t));
+            selectTeam(selectedTeam); // Re-fetch members and shared files for the selected team
+            setIsRemoveMemberModalOpen(false);
+            setMemberToRemove(null);
+            setSuccess('Member removed!');
         } catch (err) {
             setError(err.response?.data?.detail || 'Failed to remove member');
+            setIsRemoveMemberModalOpen(false);
+            setMemberToRemove(null);
         }
     };
 
@@ -341,7 +345,7 @@ export default function TeamsPage() {
                                         </h3>
                                         {canManageMembers && (
                                             <button
-                                                onClick={() => setShowAddMemberModal(true)}
+                                                onClick={() => setIsAddMemberModalOpen(true)}
                                                 className="btn-secondary text-sm px-3 py-2 flex items-center gap-2"
                                             >
                                                 <UserPlus className="w-4 h-4" />
@@ -370,7 +374,7 @@ export default function TeamsPage() {
                                                         className="p-2 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-lg transition-colors"
                                                         title="Remove Member"
                                                     >
-                                                        <UserMinus className="w-4 h-4" />
+                                                        <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 )}
                                             </div>
@@ -529,69 +533,132 @@ export default function TeamsPage() {
 
             {/* Add Member Modal */}
             <AnimatePresence>
-                {showAddMemberModal && (
+                {isAddMemberModalOpen && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-                        onClick={() => setShowAddMemberModal(false)}
                     >
                         <motion.div
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            className="bg-card border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
-                            onClick={e => e.stopPropagation()}
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="w-full max-w-md bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
                         >
                             <div className="p-6 border-b border-white/10 flex justify-between items-center">
-                                <h2 className="text-xl font-bold">Add Member</h2>
-                                <button onClick={() => setShowAddMemberModal(false)} className="text-muted-foreground hover:text-foreground">
-                                    <X className="w-5 h-5" />
+                                <h3 className="text-xl font-bold text-foreground">Add Team Member</h3>
+                                <button
+                                    onClick={() => setIsAddMemberModalOpen(false)}
+                                    className="p-2 text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-full transition-colors"
+                                >
+                                    <X size={20} />
                                 </button>
                             </div>
+
                             <form onSubmit={handleAddMember} className="p-6 space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-muted-foreground">Username</label>
+                                {modalError && (
+                                    <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium flex items-start gap-3">
+                                        <AlertTriangle size={20} className="shrink-0 mt-0.5" />
+                                        <span>{modalError}</span>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <label className="block text-sm font-medium text-muted-foreground mb-1">
+                                        Username
+                                    </label>
                                     <div className="relative">
-                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                                         <input
                                             type="text"
-                                            className="w-full bg-secondary/50 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50"
                                             value={newMemberUsername}
                                             onChange={(e) => setNewMemberUsername(e.target.value)}
                                             placeholder="Enter username"
-                                            required
+                                            className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                                            autoFocus
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-2">
+                                <div className="mt-4 space-y-2">
                                     <label className="text-sm font-medium text-muted-foreground">Role</label>
-                                    <select
-                                        className="w-full bg-secondary/50 border border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none"
-                                        value={newMemberRole}
-                                        onChange={(e) => setNewMemberRole(e.target.value)}
-                                    >
-                                        <option value="member">Member (view/download only)</option>
-                                        <option value="admin">Admin (can share files)</option>
-                                    </select>
+                                    <div className="relative">
+                                        <Settings className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                        <select
+                                            className="w-full bg-secondary/50 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none text-foreground"
+                                            value={newMemberRole}
+                                            onChange={(e) => setNewMemberRole(e.target.value)}
+                                        >
+                                            <option value="member">Member (view/download only)</option>
+                                            <option value="admin">Admin (can share files)</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div className="flex gap-3 pt-2">
+
+                                <div className="flex items-center justify-end space-x-3 mt-6">
                                     <button
                                         type="button"
-                                        onClick={() => setShowAddMemberModal(false)}
-                                        className="flex-1 btn-secondary"
+                                        onClick={() => setIsAddMemberModalOpen(false)}
+                                        className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="flex-1 btn-primary"
+                                        disabled={!newMemberUsername}
+                                        className="px-6 py-2 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
                                     >
                                         Add Member
                                     </button>
                                 </div>
                             </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {isRemoveMemberModalOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="w-full max-w-md bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-6">
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <div className="p-3 bg-red-500/10 rounded-full">
+                                        <AlertTriangle size={24} className="text-red-500" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-foreground">Remove Member</h3>
+                                        <p className="text-muted-foreground text-sm mt-1">
+                                            Are you sure you want to remove this member from the team?
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-end space-x-3 mt-6">
+                                    <button
+                                        onClick={() => setIsRemoveMemberModalOpen(false)}
+                                        className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={confirmRemoveMember}
+                                        className="px-6 py-2 bg-destructive text-destructive-foreground font-bold rounded-lg hover:bg-destructive/90 transition-colors shadow-lg shadow-destructive/20"
+                                    >
+                                        Remove Member
+                                    </button>
+                                </div>
+                            </div>
                         </motion.div>
                     </motion.div>
                 )}
