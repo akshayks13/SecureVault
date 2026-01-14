@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { LogOut, User, Activity, Shield, Users, FileText, Lock, StickyNote } from 'lucide-react';
@@ -42,7 +41,7 @@ export default function Navbar() {
         >
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity">
-                    <Image src="/logo.png" alt="SecureVault" width={32} height={32} className="w-8 h-8" />
+                    <Shield className="w-8 h-8 text-blue-500" />
                     <span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
                         SecureVault
                     </span>

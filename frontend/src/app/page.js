@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import { useAuth } from '@/context/AuthContext';
 import { Shield, Lock, FileSignature, Smartphone, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -32,7 +33,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground overflow-hidden">
+    <main className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Navbar />
 
       {/* Hero Section */}
@@ -144,13 +145,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-12 text-center text-muted-foreground">
-        <div className="container mx-auto px-4">
-          <p className="flex items-center justify-center gap-2">
-            © 2024 SecureVault. Built with security in mind.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }
