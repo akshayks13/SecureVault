@@ -14,13 +14,15 @@ import {
     RefreshCw,
     Key,
     Repeat,
-    BarChart3,
     Lightbulb,
     ArrowRight,
     Loader2,
     CheckCircle2,
-    XCircle,
-    AlertTriangle
+    AlertTriangle,
+    Trophy,
+    TrendingUp,
+    TrendingDown,
+    Gauge
 } from 'lucide-react';
 
 export default function PasswordHealthPage() {
@@ -61,13 +63,30 @@ export default function PasswordHealthPage() {
         return 'text-destructive';
     };
 
+    const getScoreBgColor = (score) => {
+        if (score >= 80) return 'bg-emerald-500';
+        if (score >= 60) return 'bg-yellow-500';
+        if (score >= 40) return 'bg-orange-500';
+        return 'bg-destructive';
+    };
+
     const getLevelIcon = (level) => {
         switch (level) {
-            case 'excellent': return '🏆';
-            case 'good': return '✅';
-            case 'fair': return '⚠️';
-            default: return '❌';
+            case 'excellent': return <Trophy className="w-8 h-8 text-amber-400" />;
+            case 'good': return <TrendingUp className="w-8 h-8 text-emerald-500" />;
+            case 'fair': return <Gauge className="w-8 h-8 text-yellow-500" />;
+            default: return <TrendingDown className="w-8 h-8 text-destructive" />;
         }
+    };
+
+    const getLevelBadge = (level) => {
+        const styles = {
+            excellent: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+            good: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+            fair: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+            poor: 'bg-destructive/10 text-destructive border-destructive/20'
+        };
+        return styles[level] || styles.poor;
     };
 
     if (authLoading || loading) {
@@ -112,94 +131,137 @@ export default function PasswordHealthPage() {
                         className="space-y-6"
                     >
                         {/* Overall Score Card */}
-                        <div className="bg-card border border-white/10 rounded-2xl p-8 text-center relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-destructive via-yellow-500 to-emerald-500 opacity-50" />
-                            <div className="relative z-10">
-                                <div className="text-6xl mb-4">{getLevelIcon(health.overall_level)}</div>
-                                <div className={`text-5xl font-bold mb-2 ${getScoreColor(health.overall_score)}`}>
-                                    {health.overall_score}/100
+                        <div className="bg-card border border-white/10 rounded-2xl p-8 relative overflow-hidden">
+                            <div className={`absolute top-0 left-0 w-full h-1 ${getScoreBgColor(health.overall_score)} opacity-50`} />
+
+                            <div className="flex flex-col md:flex-row items-center gap-8">
+                                {/* Score Circle */}
+                                <div className="relative">
+                                    <svg className="w-36 h-36 -rotate-90">
+                                        <circle
+                                            cx="72"
+                                            cy="72"
+                                            r="64"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="8"
+                                            className="text-white/5"
+                                        />
+                                        <circle
+                                            cx="72"
+                                            cy="72"
+                                            r="64"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="8"
+                                            strokeLinecap="round"
+                                            strokeDasharray={`${health.overall_score * 4.02} 402`}
+                                            className={getScoreColor(health.overall_score)}
+                                        />
+                                    </svg>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span className={`text-4xl font-bold ${getScoreColor(health.overall_score)}`}>
+                                            {health.overall_score}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">/ 100</span>
+                                    </div>
                                 </div>
-                                <div className={`text-xl font-medium capitalize mb-6 opacity-90 ${getScoreColor(health.overall_score)}`}>
-                                    {health.overall_level} Security
+
+                                {/* Score Details */}
+                                <div className="text-center md:text-left flex-1">
+                                    <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
+                                        <div className={`p-2.5 rounded-xl ${getLevelBadge(health.overall_level)}`}>
+                                            {getLevelIcon(health.overall_level)}
+                                        </div>
+                                        <div>
+                                            <h2 className={`text-2xl font-bold capitalize ${getScoreColor(health.overall_score)}`}>
+                                                {health.overall_level} Security
+                                            </h2>
+                                            <p className="text-sm text-muted-foreground">
+                                                Based on {health.total_passwords} password{health.total_passwords !== 1 ? 's' : ''}
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <p className="text-muted-foreground">
-                                    Based on an analysis of {health.total_passwords} password{health.total_passwords !== 1 ? 's' : ''}
-                                </p>
                             </div>
                         </div>
 
                         {/* Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div className="bg-card border border-white/10 rounded-xl p-5 hover:border-emerald-500/30 transition-colors group">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500/20 transition-colors">
-                                        <ShieldCheck className="w-6 h-6" />
-                                    </div>
-                                    <span className="text-3xl font-bold text-emerald-500">{health.strong_count}</span>
-                                </div>
-                                <h3 className="font-medium text-muted-foreground">Strong Passwords</h3>
-                            </div>
-
-                            <div className="bg-card border border-white/10 rounded-xl p-5 hover:border-yellow-500/30 transition-colors group">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-2 rounded-lg bg-yellow-500/10 text-yellow-500 group-hover:bg-yellow-500/20 transition-colors">
-                                        <ShieldAlert className="w-6 h-6" />
-                                    </div>
-                                    <span className="text-3xl font-bold text-yellow-500">{health.weak_count}</span>
-                                </div>
-                                <h3 className="font-medium text-muted-foreground">Weak Passwords</h3>
-                            </div>
-
-                            <div className="bg-card border border-white/10 rounded-xl p-5 hover:border-destructive/30 transition-colors group">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-2 rounded-lg bg-destructive/10 text-destructive group-hover:bg-destructive/20 transition-colors">
-                                        <ShieldX className="w-6 h-6" />
-                                    </div>
-                                    <span className="text-3xl font-bold text-destructive">{health.reused_count}</span>
-                                </div>
-                                <h3 className="font-medium text-muted-foreground">Reused Passwords</h3>
-                            </div>
-
-                            <div className="bg-card border border-white/10 rounded-xl p-5 hover:border-primary/30 transition-colors group">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
-                                        <Key className="w-6 h-6" />
-                                    </div>
-                                    <span className="text-3xl font-bold text-foreground">{health.total_passwords}</span>
-                                </div>
-                                <h3 className="font-medium text-muted-foreground">Total Passwords</h3>
-                            </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <StatCard
+                                icon={<ShieldCheck className="w-5 h-5" />}
+                                iconBg="bg-emerald-500/10"
+                                iconColor="text-emerald-500"
+                                value={health.strong_count}
+                                label="Strong"
+                                borderHover="hover:border-emerald-500/30"
+                            />
+                            <StatCard
+                                icon={<ShieldAlert className="w-5 h-5" />}
+                                iconBg="bg-yellow-500/10"
+                                iconColor="text-yellow-500"
+                                value={health.weak_count}
+                                label="Weak"
+                                borderHover="hover:border-yellow-500/30"
+                            />
+                            <StatCard
+                                icon={<Repeat className="w-5 h-5" />}
+                                iconBg="bg-destructive/10"
+                                iconColor="text-destructive"
+                                value={health.reused_count}
+                                label="Reused"
+                                borderHover="hover:border-destructive/30"
+                            />
+                            <StatCard
+                                icon={<Key className="w-5 h-5" />}
+                                iconBg="bg-primary/10"
+                                iconColor="text-primary"
+                                value={health.total_passwords}
+                                label="Total"
+                                borderHover="hover:border-primary/30"
+                            />
                         </div>
 
                         {/* Recommendations */}
-                        <div className="bg-card border border-white/10 rounded-xl p-6">
-                            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                                <Lightbulb className="w-5 h-5 text-yellow-500" />
-                                Recommendations
-                            </h3>
-                            <ul className="space-y-3">
-                                {health.recommendations.map((rec, i) => (
-                                    <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground group">
-                                        <ArrowRight className="w-4 h-4 text-primary mt-0.5 shrink-0 group-hover:translate-x-1 transition-transform" />
-                                        <span>{rec}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                        {health.recommendations?.length > 0 && (
+                            <div className="bg-card border border-white/10 rounded-xl overflow-hidden">
+                                <div className="p-5 border-b border-white/10 flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
+                                        <Lightbulb className="w-5 h-5" />
+                                    </div>
+                                    <h3 className="font-semibold text-lg">Recommendations</h3>
+                                </div>
+                                <div className="divide-y divide-white/5">
+                                    {health.recommendations.map((rec, i) => (
+                                        <div key={i} className="p-4 flex items-start gap-3 hover:bg-white/5 transition-colors group">
+                                            <ArrowRight className="w-4 h-4 text-primary mt-0.5 shrink-0 group-hover:translate-x-1 transition-transform" />
+                                            <span className="text-sm text-muted-foreground">{rec}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Weak Passwords */}
-                        {health.weak_passwords.length > 0 && (
+                        {health.weak_passwords?.length > 0 && (
                             <div className="bg-card border border-white/10 rounded-xl overflow-hidden">
-                                <div className="p-4 border-b border-white/10 bg-destructive/5 flex items-center gap-2">
-                                    <AlertTriangle className="w-5 h-5 text-destructive" />
-                                    <h3 className="font-bold text-destructive">Action Required: Weak Passwords ({health.weak_passwords.length})</h3>
+                                <div className="p-5 border-b border-white/10 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
+                                            <AlertTriangle className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold">Weak Passwords</h3>
+                                            <p className="text-xs text-muted-foreground">{health.weak_passwords.length} passwords need attention</p>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="divide-y divide-white/5">
                                     {health.weak_passwords.map((pwd) => (
                                         <div key={pwd.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/5 transition-colors">
                                             <div className="flex items-center gap-3">
-                                                <div className="p-2 rounded-lg bg-black/30 text-muted-foreground">
-                                                    <Key className="w-5 h-5" />
+                                                <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center">
+                                                    <Key className="w-4 h-4 text-muted-foreground" />
                                                 </div>
                                                 <div>
                                                     <div className="font-medium">{pwd.name}</div>
@@ -223,27 +285,33 @@ export default function PasswordHealthPage() {
                         )}
 
                         {/* Reused Passwords */}
-                        {health.reused_passwords.length > 0 && (
+                        {health.reused_passwords?.length > 0 && (
                             <div className="bg-card border border-white/10 rounded-xl overflow-hidden">
-                                <div className="p-4 border-b border-white/10 bg-orange-500/5 flex items-center gap-2">
-                                    <Repeat className="w-5 h-5 text-orange-500" />
-                                    <h3 className="font-bold text-orange-500">Security Risk: Reused Passwords ({health.reused_passwords.length})</h3>
+                                <div className="p-5 border-b border-white/10 flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500">
+                                        <Repeat className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold">Reused Passwords</h3>
+                                        <p className="text-xs text-muted-foreground">Using the same password is a security risk</p>
+                                    </div>
                                 </div>
                                 <div className="divide-y divide-white/5">
                                     {health.reused_passwords.map((group, i) => (
                                         <div key={i} className="p-4 hover:bg-white/5 transition-colors">
                                             <div className="flex flex-col gap-3">
                                                 <div className="flex items-center gap-2">
+                                                    <ShieldX className="w-4 h-4 text-orange-500" />
                                                     <span className="font-medium">Password reused {group.count} times</span>
-                                                    <span className="text-xs text-muted-foreground bg-black/30 px-2 py-0.5 rounded font-mono">
+                                                    <span className="text-xs text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded font-mono">
                                                         "{group.password_preview}"
                                                     </span>
                                                 </div>
-                                                <div className="text-sm text-muted-foreground pl-4 border-l-2 border-white/10 space-y-1">
-                                                    <div className="text-xs uppercase tracking-wider opacity-70 mb-1">Used in:</div>
+                                                <div className="text-sm text-muted-foreground pl-6 border-l-2 border-white/10 space-y-2">
+                                                    <div className="text-xs uppercase tracking-wider opacity-70">Used in:</div>
                                                     <div className="flex flex-wrap gap-2">
                                                         {group.items.map((item) => (
-                                                            <span key={item.id} className="bg-secondary/50 px-2 py-1 rounded text-xs flex items-center gap-1">
+                                                            <span key={item.id} className="bg-secondary/50 px-2.5 py-1 rounded-lg text-xs flex items-center gap-1.5 border border-white/5">
                                                                 <Key className="w-3 h-3 text-primary" />
                                                                 {item.name}
                                                             </span>
@@ -258,17 +326,22 @@ export default function PasswordHealthPage() {
                         )}
 
                         {/* Strong Passwords */}
-                        {health.strong_passwords.length > 0 && (
+                        {health.strong_passwords?.length > 0 && (
                             <div className="bg-card border border-white/10 rounded-xl overflow-hidden">
-                                <div className="p-4 border-b border-white/10 bg-emerald-500/5 flex items-center gap-2">
-                                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                                    <h3 className="font-bold text-emerald-500">Secure: Strong Passwords ({health.strong_passwords.length})</h3>
+                                <div className="p-5 border-b border-white/10 flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
+                                        <CheckCircle2 className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold">Strong Passwords</h3>
+                                        <p className="text-xs text-muted-foreground">{health.strong_passwords.length} passwords are secure</p>
+                                    </div>
                                 </div>
                                 <div className="divide-y divide-white/5">
                                     {health.strong_passwords.slice(0, 5).map((pwd) => (
-                                        <div key={pwd.id} className="p-4 flex items-center gap-3">
-                                            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
-                                                <ShieldCheck className="w-5 h-5" />
+                                        <div key={pwd.id} className="p-4 flex items-center gap-3 hover:bg-white/5 transition-colors">
+                                            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                                <ShieldCheck className="w-4 h-4 text-emerald-500" />
                                             </div>
                                             <div>
                                                 <div className="font-medium">{pwd.name}</div>
@@ -291,6 +364,20 @@ export default function PasswordHealthPage() {
                     </motion.div>
                 )}
             </main>
+        </div>
+    );
+}
+
+function StatCard({ icon, iconBg, iconColor, value, label, borderHover }) {
+    return (
+        <div className={`bg-card border border-white/10 rounded-xl p-5 transition-colors ${borderHover}`}>
+            <div className="flex items-center justify-between mb-3">
+                <div className={`p-2 rounded-lg ${iconBg} ${iconColor}`}>
+                    {icon}
+                </div>
+                <span className={`text-2xl font-bold ${iconColor}`}>{value}</span>
+            </div>
+            <h3 className="text-sm font-medium text-muted-foreground">{label}</h3>
         </div>
     );
 }
