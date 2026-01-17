@@ -1,75 +1,127 @@
 # SecureVault
 
-A secure digital vault application that allows users to store passwords and files using strong authentication, authorization, encryption, hashing, and encoding mechanisms.
+A secure digital vault application for storing passwords, files, and notes with end-to-end encryption, multi-factor authentication, and role-based access control.
 
 ## Security Features
 
-| Concept | Implementation |
-|---------|----------------|
-| **Authentication** | Password + OTP (Multi-Factor Authentication) |
-| **Authorization** | RBAC - Users can only access their own data |
-| **Encryption** | AES-256-GCM for files and passwords |
-| **Hashing** | bcrypt for passwords, SHA-256 for integrity |
-| **Digital Signatures** | RSA-2048 with PSS padding for tamper detection |
-| **Encoding** | Base64 for binary data transport |
+| Security Concept | Implementation |
+|------------------|----------------|
+| Authentication | Password + OTP (Multi-Factor Authentication) |
+| Authorization | Role-based access control (RBAC) - users can only access their own data |
+| Encryption | AES-256-GCM for all stored data (passwords, files, notes) |
+| Hashing | bcrypt for password storage, SHA-256 for data integrity verification |
+| Digital Signatures | RSA-2048 with PSS padding for tamper detection |
+| Encoding | Base64 for binary data transport |
+
+## Features
+
+### Password Management
+- Store and organize passwords with labels, websites, and usernames
+- Edit and update existing passwords
+- Password strength meter with real-time feedback
+- Password generator with customizable options (length, character types)
+- Password health report showing weak, reused, and strong passwords
+
+### File Storage
+- Upload and download encrypted files
+- File integrity verification with hash and signature checks
+- File preview for images and PDFs
+- Tamper detection alerts
+
+### Secure Notes
+- Create, edit, and delete encrypted notes
+- Full-text content storage with encryption
+
+### Teams and Collaboration
+- Create teams for shared file access
+- Role-based permissions (Owner, Admin, Member)
+- Share encrypted files with team members
+- Manage team membership
+
+### User Management
+- User registration with secure password hashing
+- Multi-factor authentication with OTP
+- Forgot password flow with reset tokens
+- User profile with security status
 
 ## Project Structure
 
 ```
-Cys_Proj/
-├── backend/                 # FastAPI Backend
-│   ├── main.py             # Application entry point
-│   ├── database.py         # SQLite connection
-│   ├── models.py           # User & VaultItem models
+SecureVault/
+├── backend/                    # FastAPI Backend
+│   ├── main.py                # Application entry point
+│   ├── database.py            # SQLite database configuration
+│   ├── models.py              # SQLAlchemy models (User, VaultItem, Team)
 │   ├── auth/
-│   │   ├── jwt.py          # JWT token handling
-│   │   └── otp.py          # OTP generation/verification
+│   │   ├── jwt.py             # JWT token generation and validation
+│   │   └── otp.py             # OTP generation and verification
 │   ├── crypto/
-│   │   ├── password.py     # bcrypt hashing
-│   │   ├── aes.py          # AES-256-GCM encryption
-│   │   ├── rsa.py          # RSA digital signatures
-│   │   ├── hashing.py      # SHA-256 hashing
-│   │   └── encoding.py     # Base64 encoding
+│   │   ├── password.py        # bcrypt password hashing
+│   │   ├── aes.py             # AES-256-GCM encryption/decryption
+│   │   ├── rsa.py             # RSA digital signatures
+│   │   ├── hashing.py         # SHA-256 integrity hashing
+│   │   └── encoding.py        # Base64 encoding utilities
 │   └── routes/
-│       ├── auth.py         # Register, Login, OTP routes
-│       └── vault.py        # Password & File vault routes
+│       ├── auth.py            # Authentication endpoints
+│       ├── vault.py           # Password, file, and note endpoints
+│       ├── teams.py           # Team management endpoints
+│       └── utils.py           # Password generator and health check
 │
-└── frontend/               # Next.js Frontend
+└── frontend/                   # Next.js Frontend
     └── src/
         ├── app/
-        │   ├── page.js              # Landing page
-        │   ├── login/page.js        # Login page
-        │   ├── register/page.js     # Register page
-        │   ├── verify-otp/page.js   # OTP verification
-        │   ├── dashboard/page.js    # User dashboard
+        │   ├── page.js                 # Landing page
+        │   ├── login/                  # Login page
+        │   ├── register/               # Registration page
+        │   ├── verify-otp/             # OTP verification
+        │   ├── forgot-password/        # Password recovery
+        │   ├── reset-password/         # Password reset
+        │   ├── dashboard/              # User dashboard
+        │   ├── profile/                # User profile
+        │   ├── password-health/        # Password health report
+        │   ├── teams/                  # Team management
         │   └── vault/
-        │       ├── passwords/page.js # Password manager
-        │       └── files/page.js     # File storage
-        ├── lib/api.js               # Axios API client
-        └── context/AuthContext.js   # Auth state management
+        │       ├── passwords/          # Password manager
+        │       ├── files/              # File storage
+        │       └── notes/              # Secure notes
+        ├── components/
+        │   ├── Navbar.js               # Navigation bar
+        │   ├── Footer.js               # Footer component
+        │   ├── PasswordGenerator.js    # Password generator widget
+        │   └── PasswordStrengthMeter.js # Strength indicator
+        ├── context/
+        │   └── AuthContext.js          # Authentication state
+        └── lib/
+            └── api.js                  # Axios API client
 ```
 
 ## Quick Start
 
-### 1. Start the Backend
+### Prerequisites
+- Python 3.8+
+- Node.js 18+
+- npm or yarn
+
+### Backend Setup
 
 ```bash
 cd backend
 
-# Create virtual environment
+# Create and activate virtual environment
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Start server
+# Start the server
 uvicorn main:app --reload
 ```
 
-Backend will run at: `http://localhost:8000`
+Backend runs at: `http://localhost:8000`
+API documentation: `http://localhost:8000/docs`
 
-### 2. Start the Frontend
+### Frontend Setup
 
 ```bash
 cd frontend
@@ -77,51 +129,52 @@ cd frontend
 # Install dependencies
 npm install
 
-# Start dev server
+# Start the development server
 npm run dev
 ```
 
-Frontend will run at: `http://localhost:3000`
+Frontend runs at: `http://localhost:3000`
 
-## 🔑 API Endpoints
+## Demo Flow
 
-### Authentication
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/auth/register` | POST | Register new user |
-| `/auth/login` | POST | Login (sends OTP) |
-| `/auth/verify-otp` | POST | Verify OTP, get JWT |
-| `/auth/me` | GET | Get current user |
-
-### Vault
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/vault/passwords` | POST | Store encrypted password |
-| `/vault/passwords` | GET | List all passwords |
-| `/vault/files` | POST | Upload encrypted file |
-| `/vault/files` | GET | List all files |
-| `/vault/files/{id}/download` | GET | Download decrypted file |
-| `/vault/files/{id}/verify` | GET | Verify file integrity |
-
-## 📝 Demo Flow
-
-1. **Register** - Create account (password hashed with bcrypt)
-2. **Login** - Enter credentials (OTP printed to backend console)
+1. **Register** - Create an account (password hashed with bcrypt)
+2. **Login** - Enter credentials (OTP is printed to the backend console for demo)
 3. **Verify OTP** - Complete multi-factor authentication
-4. **Store Password** - Add credentials (encrypted with AES-256)
-5. **Upload File** - Store file (encrypted + signed)
-6. **Verify Integrity** - Check file hasn't been tampered
+4. **Store Passwords** - Add credentials (encrypted with AES-256-GCM)
+5. **Upload Files** - Store files (encrypted and digitally signed)
+6. **Create Notes** - Write secure notes (encrypted storage)
+7. **Check Health** - View password health report
+8. **Create Teams** - Collaborate with shared encrypted files
 
-## 🔍 Security Demonstration Points
+## Security Demonstration
 
-- **Database Inspection**: All passwords are hashed, data is encrypted
-- **Access Control**: Try accessing another user's data → 403 Forbidden
-- **Tamper Detection**: Modify encrypted file → Signature verification fails
-- **MFA**: Cannot login without valid OTP
+- **Database Inspection**: All passwords are hashed, all data is encrypted
+- **Access Control**: Attempting to access another user's data returns 403 Forbidden
+- **Tamper Detection**: Modifying encrypted data causes signature verification to fail
+- **MFA Requirement**: Login requires valid OTP verification
+- **Password Strength**: Weak passwords are identified in health reports
 
-## 📚 Technologies
+## Technologies
 
-- **Backend**: FastAPI, SQLAlchemy, python-jose, passlib, cryptography
-- **Frontend**: Next.js 15, React, Axios
-- **Database**: SQLite
-- **Crypto**: AES-256-GCM, RSA-2048, bcrypt, SHA-256
+### Backend
+- FastAPI - Modern Python web framework
+- SQLAlchemy - Database ORM
+- SQLite - Database
+- python-jose - JWT handling
+- passlib - Password hashing (bcrypt)
+- cryptography - AES and RSA operations
+- pyotp - OTP generation
+
+### Frontend
+- Next.js 16 - React framework
+- React 19 - UI library
+- Axios - HTTP client
+- Framer Motion - Animations
+- Lucide React - Icons
+
+### Cryptography
+- AES-256-GCM - Symmetric encryption for data
+- RSA-2048 with PSS - Digital signatures
+- bcrypt - Password hashing
+- SHA-256 - Integrity hashing
+- Base64 - Binary encoding

@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SecureVault Frontend
 
-## Getting Started
+Next.js frontend application for SecureVault - a secure digital vault for passwords, files, and notes.
 
-First, run the development server:
+## Setup
 
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build for production
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application runs at `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file in the frontend directory:
 
-## Learn More
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/                        # Next.js App Router pages
+│   ├── page.js                 # Landing page
+│   ├── layout.js               # Root layout with providers
+│   ├── globals.css             # Global styles
+│   ├── login/                  # Login page
+│   ├── register/               # Registration page
+│   ├── verify-otp/             # OTP verification page
+│   ├── forgot-password/        # Password recovery page
+│   ├── reset-password/         # Password reset page
+│   ├── dashboard/              # Main dashboard
+│   ├── profile/                # User profile page
+│   ├── password-health/        # Password health report
+│   ├── teams/                  # Team management
+│   └── vault/
+│       ├── passwords/          # Password manager
+│       ├── files/              # Encrypted file storage
+│       └── notes/              # Secure notes
+│
+├── components/                 # Reusable components
+│   ├── Navbar.js               # Navigation bar
+│   ├── Footer.js               # Footer component
+│   ├── PasswordGenerator.js    # Password generator with options
+│   └── PasswordStrengthMeter.js # Password strength indicator
+│
+├── context/                    # React contexts
+│   └── AuthContext.js          # Authentication state management
+│
+└── lib/                        # Utilities
+    └── api.js                  # Axios API client with interceptors
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Pages
 
-## Deploy on Vercel
+| Route | Description |
+|-------|-------------|
+| `/` | Landing page with feature overview |
+| `/login` | User login |
+| `/register` | New user registration |
+| `/verify-otp` | OTP verification for MFA |
+| `/forgot-password` | Request password reset |
+| `/reset-password` | Set new password |
+| `/dashboard` | Main dashboard with quick actions |
+| `/profile` | User profile and security info |
+| `/vault/passwords` | Password manager (add, edit, delete) |
+| `/vault/files` | File storage with preview and download |
+| `/vault/notes` | Secure notes editor |
+| `/password-health` | Password health analysis |
+| `/teams` | Team creation and file sharing |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Key Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Responsive design with dark theme
+- Animated UI with Framer Motion
+- Password strength meter with real-time feedback
+- Password generator with customizable options
+- File preview for images and PDFs
+- Search and filter functionality
+- Team collaboration interface
+
+## Technologies
+
+- Next.js 16 with App Router
+- React 19
+- Axios for API requests
+- Framer Motion for animations
+- Lucide React for icons
+- CSS with custom properties
