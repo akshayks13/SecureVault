@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
-import { Lock, Key, FileSignature, ShieldCheck, User, Fingerprint, Mail, Calendar, Shield, Award } from 'lucide-react';
+import { Lock, Key, FileSignature, ShieldCheck, User, Fingerprint, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function ProfilePage() {
@@ -73,17 +73,10 @@ export default function ProfilePage() {
 
                         {/* User Info */}
                         <div className="text-center md:text-left flex-1">
-                            <h1 className="text-3xl font-bold mb-1">{user?.username}</h1>
-                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-muted-foreground">
-                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${user?.role === 'admin'
-                                        ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                                        : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
-                                    }`}>
-                                    {user?.role === 'admin' ? <Award className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
-                                    {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1)}
-                                </span>
-                                <span className="text-sm flex items-center gap-1.5">
-                                    <Shield className="w-3.5 h-3.5 text-emerald-500" />
+                            <h1 className="text-3xl font-bold mb-2">{user?.username}</h1>
+                            <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                    <Shield className="w-3.5 h-3.5" />
                                     Account Protected
                                 </span>
                             </div>

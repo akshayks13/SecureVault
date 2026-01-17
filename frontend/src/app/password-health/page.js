@@ -276,7 +276,7 @@ export default function PasswordHealthPage() {
                                                 href="/vault/passwords"
                                                 className="btn-secondary text-xs px-3 py-1.5 h-auto whitespace-nowrap"
                                             >
-                                                Update Password
+                                                View in Vault
                                             </Link>
                                         </div>
                                     ))}
