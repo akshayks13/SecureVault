@@ -79,6 +79,9 @@ export const vaultAPI = {
     deletePassword: (id) =>
         api.delete(`/vault/passwords/${id}`),
 
+    updatePassword: (id, name, website, username, password) =>
+        api.put(`/vault/passwords/${id}`, { name, website, username, password }),
+
     // Files
     uploadFile: (name, file) => {
         const formData = new FormData();

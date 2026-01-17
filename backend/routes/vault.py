@@ -271,6 +271,54 @@ async def delete_password(
     return {"message": "Item deleted successfully"}
 
 
+@router.put("/passwords/{item_id}")
+async def update_password(
+    item_id: int,
+    request: PasswordStoreRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update an existing password.
+    
+    - RBAC: Only owner can update
+    - Re-encrypts with new key
+    """
+    import json
+    
+    item = db.query(VaultItem).filter(
+        VaultItem.id == item_id,
+        VaultItem.user_id == current_user.id,
+        VaultItem.type == VaultItemType.PASSWORD.value
+    ).first()
+    
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Password not found or access denied"
+        )
+    
+    # Re-encrypt with new content
+    password_data = json.dumps({
+        "website": request.website,
+        "username": request.username,
+        "password": request.password
+    }).encode()
+    
+    encrypted_b64, key_b64, iv_b64, data_hash, signature_b64 = encrypt_and_store(password_data)
+    
+    item.name = request.name
+    item.encrypted_data = encrypted_b64
+    item.encryption_key = key_b64
+    item.iv = iv_b64
+    item.hash = data_hash
+    item.signature = signature_b64
+    
+    db.commit()
+    
+    return {"message": "Password updated successfully"}
+
+
 # File Routes
 @router.post("/files", status_code=status.HTTP_201_CREATED)
 async def upload_file(

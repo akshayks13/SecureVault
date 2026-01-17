@@ -123,18 +123,6 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
                             </div>
-
-                            <div className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center">
-                                        <Shield className="w-4 h-4 text-muted-foreground" />
-                                    </div>
-                                    <div>
-                                        <div className="text-sm text-muted-foreground">Role</div>
-                                        <div className="font-medium capitalize">{user?.role}</div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </motion.div>
 

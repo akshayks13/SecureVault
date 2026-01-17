@@ -7,7 +7,7 @@ import { vaultAPI } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import PasswordGenerator from '@/components/PasswordGenerator';
 import PasswordStrengthMeter from '@/components/PasswordStrengthMeter';
-import { Search, Plus, Key, Trash2, Eye, EyeOff, X, Copy, Globe, User, Clock, Loader2 } from 'lucide-react';
+import { Search, Plus, Key, Trash2, Eye, EyeOff, X, Copy, Globe, User, Clock, Loader2, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PasswordsPage() {
@@ -22,6 +22,7 @@ export default function PasswordsPage() {
     const [error, setError] = useState('');
     const [visiblePasswords, setVisiblePasswords] = useState({});
     const [copiedId, setCopiedId] = useState(null);
+    const [editingPassword, setEditingPassword] = useState(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -67,21 +68,50 @@ export default function PasswordsPage() {
         setSaving(true);
 
         try {
-            await vaultAPI.storePassword(
-                formData.name,
-                formData.website,
-                formData.username,
-                formData.password
-            );
-            setShowModal(false);
-            setShowGenerator(false);
-            setFormData({ name: '', website: '', username: '', password: '' });
+            if (editingPassword) {
+                // Update existing password
+                await vaultAPI.updatePassword(
+                    editingPassword.id,
+                    formData.name,
+                    formData.website,
+                    formData.username,
+                    formData.password
+                );
+            } else {
+                // Create new password
+                await vaultAPI.storePassword(
+                    formData.name,
+                    formData.website,
+                    formData.username,
+                    formData.password
+                );
+            }
+            closeModal();
             fetchPasswords();
         } catch (err) {
             setError(err.response?.data?.detail || 'Failed to save password');
         } finally {
             setSaving(false);
         }
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setShowGenerator(false);
+        setFormData({ name: '', website: '', username: '', password: '' });
+        setEditingPassword(null);
+        setError('');
+    };
+
+    const openEditModal = (pwd) => {
+        setEditingPassword(pwd);
+        setFormData({
+            name: pwd.name,
+            website: pwd.website || '',
+            username: pwd.username,
+            password: pwd.password
+        });
+        setShowModal(true);
     };
 
     const handleDelete = async (id) => {
@@ -237,8 +267,15 @@ export default function PasswordsPage() {
                                                 </div>
                                             </div>
                                             <button
+                                                onClick={() => openEditModal(pwd)}
+                                                className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                                                title="Edit"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <button
                                                 onClick={() => handleDelete(pwd.id)}
-                                                className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors ml-2"
+                                                className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                                                 title="Delete"
                                             >
                                                 <Trash2 className="w-4.5 h-4.5" />
@@ -252,7 +289,7 @@ export default function PasswordsPage() {
                 )}
             </main>
 
-            {/* Add Password Modal */}
+            {/* Add/Edit Password Modal */}
             <AnimatePresence>
                 {showModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -260,7 +297,7 @@ export default function PasswordsPage() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            onClick={() => { setShowModal(false); setShowGenerator(false); }}
+                            onClick={closeModal}
                             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                         />
                         <motion.div
@@ -270,9 +307,11 @@ export default function PasswordsPage() {
                             className="relative w-full max-w-lg bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
                         >
                             <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-card z-10">
-                                <h2 className="text-xl font-bold">Add New Password</h2>
+                                <h2 className="text-xl font-bold">
+                                    {editingPassword ? 'Edit Password' : 'Add New Password'}
+                                </h2>
                                 <button
-                                    onClick={() => { setShowModal(false); setShowGenerator(false); }}
+                                    onClick={closeModal}
                                     className="p-2 hover:bg-white/5 rounded-full transition-colors"
                                 >
                                     <X className="w-5 h-5" />
@@ -363,7 +402,7 @@ export default function PasswordsPage() {
                                         <button
                                             type="button"
                                             className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors font-medium"
-                                            onClick={() => { setShowModal(false); setShowGenerator(false); }}
+                                            onClick={closeModal}
                                         >
                                             Cancel
                                         </button>
@@ -372,7 +411,7 @@ export default function PasswordsPage() {
                                             className="flex-1 bg-primary text-primary-foreground rounded-lg px-4 py-2.5 font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                                             disabled={saving}
                                         >
-                                            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Password'}
+                                            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : (editingPassword ? 'Update Password' : 'Save Password')}
                                         </button>
                                     </div>
                                 </form>
