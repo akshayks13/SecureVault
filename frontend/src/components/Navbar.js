@@ -37,18 +37,18 @@ export default function Navbar() {
         <motion.nav
             initial={{ y: -100 }}
             animate={{ y: 0 }}
-            className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur-md"
+            className="sticky top-0 z-50 w-full bg-surface/95 backdrop-blur-md border-b border-surface-subtle"
         >
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity">
-                    <Shield className="w-8 h-8 text-blue-500" />
-                    <span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
-                        SecureVault
-                    </span>
+                <Link href="/" className="flex items-center gap-2.5 font-semibold text-lg hover:opacity-80 transition-opacity">
+                    <div className="w-8 h-8 rounded-lg bg-accent-blue flex items-center justify-center">
+                        <Shield className="w-4.5 h-4.5 text-content" />
+                    </div>
+                    <span className="text-content">SecureVault</span>
                 </Link>
 
                 {isAuthenticated ? (
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2">
                         <ul className="hidden md:flex items-center gap-1">
                             {navItems.map((item) => {
                                 const Icon = item.icon;
@@ -58,10 +58,10 @@ export default function Navbar() {
                                         <Link
                                             href={item.href}
                                             className={cn(
-                                                "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
+                                                "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
                                                 active
-                                                    ? "bg-primary/10 text-primary"
-                                                    : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                                                    ? "bg-accent-blue/10 text-accent-blue"
+                                                    : "text-content-muted hover:text-content hover:bg-surface-subtle"
                                             )}
                                         >
                                             <Icon className="w-4 h-4" />
@@ -72,19 +72,21 @@ export default function Navbar() {
                             })}
                         </ul>
 
-                        <div className="flex items-center gap-3 pl-6 border-l border-white/10">
+                        <div className="flex items-center gap-1 ml-4 pl-4 border-l border-surface-subtle">
                             <Link
                                 href="/profile"
                                 className={cn(
-                                    "p-2 rounded-full hover:bg-white/5 transition-colors",
-                                    isActive('/profile') ? "text-primary bg-primary/10" : "text-muted-foreground"
+                                    "p-2.5 rounded-full transition-all duration-200",
+                                    isActive('/profile')
+                                        ? "text-accent-blue bg-accent-blue/10"
+                                        : "text-content-muted hover:text-content hover:bg-surface-subtle"
                                 )}
                             >
                                 <User className="w-5 h-5" />
                             </Link>
                             <button
                                 onClick={handleLogout}
-                                className="p-2 text-muted-foreground hover:text-destructive transition-colors rounded-full hover:bg-destructive/10"
+                                className="p-2.5 text-content-muted hover:text-accent-red hover:bg-accent-red/10 transition-all duration-200 rounded-full"
                                 title="Logout"
                             >
                                 <LogOut className="w-5 h-5" />
@@ -92,16 +94,16 @@ export default function Navbar() {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                         <Link
                             href="/login"
-                            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                            className="btn-ghost"
                         >
-                            Login
+                            Sign in
                         </Link>
                         <Link
                             href="/register"
-                            className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+                            className="btn-primary"
                         >
                             Get Started
                         </Link>

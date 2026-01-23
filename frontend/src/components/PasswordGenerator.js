@@ -49,30 +49,30 @@ export default function PasswordGenerator({ onSelect }) {
     };
 
     const getStrengthColor = () => {
-        if (!strength) return 'bg-muted';
+        if (!strength) return 'bg-surface-subtle';
         switch (strength.level) {
-            case 'strong': return 'bg-emerald-500';
+            case 'strong': return 'bg-accent-green';
             case 'good': return 'bg-green-500';
-            case 'fair': return 'bg-yellow-500';
-            default: return 'bg-red-500';
+            case 'fair': return 'bg-accent-yellow';
+            default: return 'bg-accent-red';
         }
     };
 
     return (
-        <div className="bg-secondary/30 rounded-xl p-4 border border-white/5">
+        <div className="bg-surface-subtle rounded-xl p-4 border border-surface-border">
             <div className="mb-4">
-                <div className="flex items-center gap-2 mb-2 p-3 bg-background rounded-lg border border-white/5 font-mono text-lg break-all min-h-[50px]">
-                    <span className="flex-1 opacity-90">
-                        {password || <span className="text-muted-foreground text-base font-sans">Click generate to start...</span>}
+                <div className="flex items-center gap-2 mb-2 p-3 bg-surface rounded-lg border border-surface-border font-mono text-lg break-all min-h-[50px]">
+                    <span className="flex-1 opacity-90 text-content">
+                        {password || <span className="text-content-muted text-base font-sans">Click generate to start...</span>}
                     </span>
                     {password && (
                         <div className="flex gap-1 shrink-0 ml-2">
                             <button
                                 onClick={copyToClipboard}
-                                className="p-2 hover:bg-secondary rounded-md transition-colors text-muted-foreground hover:text-foreground"
+                                className="p-2 hover:bg-surface-elevated rounded-md transition-colors text-content-muted hover:text-content"
                                 title="Copy"
                             >
-                                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                                {copied ? <Check className="w-4 h-4 text-accent-green" /> : <Copy className="w-4 h-4" />}
                             </button>
                         </div>
                     )}
@@ -81,7 +81,7 @@ export default function PasswordGenerator({ onSelect }) {
                 {password && onSelect && (
                     <button
                         onClick={handleUsePassword}
-                        className="w-full text-xs font-medium text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 py-1.5 rounded-md transition-colors"
+                        className="w-full text-xs font-medium text-accent-green hover:text-accent-green/80 hover:bg-accent-green/10 py-1.5 rounded-md transition-colors"
                     >
                         Use this password
                     </button>
@@ -90,15 +90,15 @@ export default function PasswordGenerator({ onSelect }) {
 
             {strength && (
                 <div className="mb-5">
-                    <div className="h-1.5 w-full bg-background rounded-full overflow-hidden mb-1.5">
+                    <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden mb-1.5">
                         <div
                             className={`h-full transition-all duration-300 ${getStrengthColor()}`}
                             style={{ width: `${strength.score}%` }}
                         />
                     </div>
                     <div className="flex justify-between text-xs">
-                        <span className="capitalize text-muted-foreground">{strength.level} Strength</span>
-                        <span className="font-medium">{strength.score}/100</span>
+                        <span className="capitalize text-content-muted">{strength.level} Strength</span>
+                        <span className="font-medium text-content">{strength.score}/100</span>
                     </div>
                 </div>
             )}
@@ -106,8 +106,8 @@ export default function PasswordGenerator({ onSelect }) {
             <div className="space-y-4">
                 <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                        <label className="text-muted-foreground">Length</label>
-                        <span className="font-mono">{options.length}</span>
+                        <label className="text-content-muted">Length</label>
+                        <span className="font-mono text-content">{options.length}</span>
                     </div>
                     <input
                         type="range"
@@ -115,55 +115,55 @@ export default function PasswordGenerator({ onSelect }) {
                         max="64"
                         value={options.length}
                         onChange={(e) => setOptions({ ...options, length: parseInt(e.target.value) })}
-                        className="w-full accent-primary h-1.5 bg-background rounded-lg appearance-none cursor-pointer"
+                        className="w-full accent-accent-blue h-1.5 bg-surface rounded-lg appearance-none cursor-pointer"
                     />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                    <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                    <label className="flex items-center gap-2 text-sm text-content-muted cursor-pointer hover:text-content transition-colors">
                         <input
                             type="checkbox"
                             checked={options.includeUppercase}
                             onChange={(e) => setOptions({ ...options, includeUppercase: e.target.checked })}
-                            className="rounded border-white/20 bg-background text-primary focus:ring-primary/50"
+                            className="rounded border-surface-border bg-surface text-accent-blue focus:ring-accent-blue/50"
                         />
                         <span>ABC</span>
                     </label>
-                    <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                    <label className="flex items-center gap-2 text-sm text-content-muted cursor-pointer hover:text-content transition-colors">
                         <input
                             type="checkbox"
                             checked={options.includeLowercase}
                             onChange={(e) => setOptions({ ...options, includeLowercase: e.target.checked })}
-                            className="rounded border-white/20 bg-background text-primary focus:ring-primary/50"
+                            className="rounded border-surface-border bg-surface text-accent-blue focus:ring-accent-blue/50"
                         />
                         <span>abc</span>
                     </label>
-                    <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                    <label className="flex items-center gap-2 text-sm text-content-muted cursor-pointer hover:text-content transition-colors">
                         <input
                             type="checkbox"
                             checked={options.includeDigits}
                             onChange={(e) => setOptions({ ...options, includeDigits: e.target.checked })}
-                            className="rounded border-white/20 bg-background text-primary focus:ring-primary/50"
+                            className="rounded border-surface-border bg-surface text-accent-blue focus:ring-accent-blue/50"
                         />
                         <span>123</span>
                     </label>
-                    <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                    <label className="flex items-center gap-2 text-sm text-content-muted cursor-pointer hover:text-content transition-colors">
                         <input
                             type="checkbox"
                             checked={options.includeSpecial}
                             onChange={(e) => setOptions({ ...options, includeSpecial: e.target.checked })}
-                            className="rounded border-white/20 bg-background text-primary focus:ring-primary/50"
+                            className="rounded border-surface-border bg-surface text-accent-blue focus:ring-accent-blue/50"
                         />
                         <span>!@#</span>
                     </label>
                 </div>
 
-                <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors py-1">
+                <label className="flex items-center gap-2 text-xs text-content-muted cursor-pointer hover:text-content transition-colors py-1">
                     <input
                         type="checkbox"
                         checked={options.excludeAmbiguous}
                         onChange={(e) => setOptions({ ...options, excludeAmbiguous: e.target.checked })}
-                        className="rounded border-white/20 bg-background text-primary focus:ring-primary/50"
+                        className="rounded border-surface-border bg-surface text-accent-blue focus:ring-accent-blue/50"
                     />
                     <span>Exclude ambiguous characters (0, O, 1, l, I)</span>
                 </label>
@@ -172,7 +172,7 @@ export default function PasswordGenerator({ onSelect }) {
             <button
                 onClick={generatePassword}
                 disabled={loading}
-                className="w-full mt-5 bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 border border-white/5 shadow-sm"
+                className="btn-secondary w-full mt-5"
             >
                 {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Dices className="w-4 h-4" />}
                 Generate New Password

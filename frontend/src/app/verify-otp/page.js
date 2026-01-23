@@ -14,7 +14,6 @@ export default function VerifyOTPPage() {
     const router = useRouter();
 
     useEffect(() => {
-        // Redirect if no pending registration
         if (!pendingUsername) {
             router.push('/register');
         }
@@ -40,45 +39,49 @@ export default function VerifyOTPPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl -z-10 opacity-20 pointer-events-none">
-                <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-500 rounded-full blur-[100px]" />
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500 rounded-full blur-[100px]" />
-            </div>
-
+        <div className="min-h-screen flex items-center justify-center p-4 bg-surface">
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="w-full max-w-md bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl p-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="w-full max-w-md"
             >
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-500 mb-4 border border-emerald-500/20">
-                        <ShieldCheck className="w-8 h-8" />
+                {/* Logo */}
+                <div className="text-center mb-10">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-green/10 mb-6">
+                        <ShieldCheck className="w-8 h-8 text-accent-green" />
                     </div>
-                    <h1 className="text-2xl font-bold mb-2">Verify Your Account</h1>
-                    <p className="text-muted-foreground">
-                        Enter the 6-digit code sent to your device
-                    </p>
+                    <h1 className="text-2xl font-semibold text-content mb-2">Verify Your Account</h1>
+                    <p className="text-content-muted text-sm">Enter the 6-digit code sent to your device</p>
                 </div>
 
-                <div className="mb-6 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm">
+                {/* Demo Mode Notice */}
+                <div className="mb-6 p-4 rounded-xl bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-sm">
                     <strong>Demo Mode:</strong> Check the backend console for your OTP code.
                 </div>
 
+                {/* Error Alert */}
                 {error && (
-                    <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive flex items-center gap-3">
-                        <AlertCircle className="w-5 h-5 shrink-0" />
-                        <p className="text-sm font-medium">{error}</p>
-                    </div>
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-6 p-4 rounded-xl bg-accent-red/10 border border-accent-red/20 flex items-center gap-3"
+                    >
+                        <AlertCircle className="w-5 h-5 text-accent-red shrink-0" />
+                        <p className="text-sm text-accent-red">{error}</p>
+                    </motion.div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground" htmlFor="otp">One-Time Password</label>
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-content-muted mb-2" htmlFor="otp">
+                            One-Time Password
+                        </label>
                         <input
                             id="otp"
                             type="text"
-                            className="w-full bg-secondary/50 border border-white/10 rounded-lg py-4 text-center text-2xl tracking-[0.5em] font-mono placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                            className="input text-center text-2xl tracking-[0.5em] font-mono py-4"
                             value={otp}
                             onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                             placeholder="000000"
@@ -89,7 +92,7 @@ export default function VerifyOTPPage() {
 
                     <button
                         type="submit"
-                        className="w-full bg-primary text-primary-foreground font-semibold rounded-lg py-3 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 disabled:opacity-70"
+                        className="btn-primary w-full mt-6"
                         disabled={loading || otp.length !== 6}
                     >
                         {loading ? (
@@ -103,8 +106,9 @@ export default function VerifyOTPPage() {
                     </button>
                 </form>
 
-                <p className="text-center mt-8 text-sm text-muted-foreground">
-                    Activating account for <strong className="text-foreground">{pendingUsername}</strong>
+                {/* Footer */}
+                <p className="text-center mt-8 text-sm text-content-muted">
+                    Activating account for <strong className="text-content">{pendingUsername}</strong>
                 </p>
             </motion.div>
         </div>

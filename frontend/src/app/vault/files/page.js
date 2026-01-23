@@ -34,7 +34,6 @@ export default function FilesPage() {
         }
     }, [isAuthenticated]);
 
-    // Search filter
     useEffect(() => {
         if (searchQuery.trim() === '') {
             setFilteredFiles(files);
@@ -104,7 +103,7 @@ export default function FilesPage() {
         const extension = file.file_name.split('.').pop().toLowerCase();
 
         if (!previewableExtensions.includes(extension)) {
-            alert('Preview not supported for this file type. Supported: Images (jpg, png, gif, webp, svg) and PDFs.');
+            alert('Preview not supported for this file type.');
             return;
         }
 
@@ -151,7 +150,7 @@ export default function FilesPage() {
         if (!confirm('Are you sure you want to delete this file?')) return;
 
         try {
-            await vaultAPI.deletePassword(id); // Same endpoint for delete
+            await vaultAPI.deletePassword(id);
             fetchFiles();
         } catch (error) {
             console.error('Failed to delete:', error);
@@ -165,32 +164,32 @@ export default function FilesPage() {
 
     const getFileIcon = (fileName) => {
         const ext = fileName.split('.').pop().toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return <ImageIcon className="w-6 h-6" />;
-        if (['js', 'py', 'html', 'css', 'json'].includes(ext)) return <FileCode className="w-6 h-6" />;
-        return <FileText className="w-6 h-6" />;
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return <ImageIcon className="w-5 h-5" />;
+        if (['js', 'py', 'html', 'css', 'json'].includes(ext)) return <FileCode className="w-5 h-5" />;
+        return <FileText className="w-5 h-5" />;
     };
 
     if (loading || !isAuthenticated) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-background">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <div className="flex items-center justify-center min-h-screen bg-surface">
+                <Loader2 className="w-8 h-8 animate-spin text-accent-blue" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-surface">
             <Navbar />
 
-            <main className="container mx-auto px-4 py-8">
+            <main className="container mx-auto px-4 py-10">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold mb-2">File Vault</h1>
-                        <p className="text-muted-foreground">Encrypted with AES-256 + RSA digital signatures</p>
+                        <h1 className="text-2xl font-semibold text-content mb-1">File Vault</h1>
+                        <p className="text-content-muted text-sm">Encrypted with AES-256 + RSA digital signatures</p>
                     </div>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="btn-primary flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-medium shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95"
+                        className="btn-primary"
                     >
                         <UploadCloud className="w-5 h-5" />
                         Upload File
@@ -198,10 +197,10 @@ export default function FilesPage() {
                 </div>
 
                 <div className="relative mb-6">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-content-subtle" />
                     <input
                         type="text"
-                        className="w-full bg-card border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-muted-foreground/50"
+                        className="input pl-12"
                         placeholder="Search files by name..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -209,29 +208,26 @@ export default function FilesPage() {
                 </div>
 
                 {filteredFiles.length === 0 ? (
-                    <div className="text-center py-20 bg-card/30 rounded-2xl border border-white/5 border-dashed">
-                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-secondary mb-6">
-                            <File className="w-10 h-10 text-muted-foreground" />
+                    <div className="card p-16 text-center border-dashed">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-subtle mb-6">
+                            <File className="w-8 h-8 text-content-subtle" />
                         </div>
-                        <h3 className="text-xl font-medium mb-2">
+                        <h3 className="text-lg font-medium text-content mb-2">
                             {files.length === 0 ? 'No files stored yet' : 'No matching files'}
                         </h3>
-                        <p className="text-muted-foreground max-w-sm mx-auto mb-6">
+                        <p className="text-content-muted text-sm max-w-sm mx-auto mb-6">
                             {files.length === 0
-                                ? 'Upload essential documents, images, or archives to keep them secure.'
+                                ? 'Upload essential documents and archives to keep them secure.'
                                 : 'Try adjusting your search terms.'}
                         </p>
                         {files.length === 0 && (
-                            <button
-                                onClick={() => setShowModal(true)}
-                                className="text-primary hover:text-primary/80 font-medium hover:underline"
-                            >
+                            <button onClick={() => setShowModal(true)} className="btn-primary">
                                 Upload your first file
                             </button>
                         )}
                     </div>
                 ) : (
-                    <div className="grid gap-4">
+                    <div className="space-y-2">
                         <AnimatePresence>
                             {filteredFiles.map((file) => (
                                 <motion.div
@@ -240,16 +236,16 @@ export default function FilesPage() {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
-                                    className="group bg-card border border-white/5 hover:border-white/10 rounded-xl p-4 transition-all hover:shadow-lg hover:shadow-black/20"
+                                    className="card card-hover p-4 group"
                                 >
                                     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 justify-between">
                                         <div className="flex items-center gap-4 flex-1 min-w-0">
-                                            <div className="p-3 rounded-lg bg-yellow-500/10 text-yellow-500 shrink-0">
+                                            <div className="icon-container icon-yellow shrink-0">
                                                 {getFileIcon(file.file_name)}
                                             </div>
                                             <div className="min-w-0">
-                                                <h3 className="font-semibold text-lg truncate pr-4">{file.name}</h3>
-                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
+                                                <h3 className="font-medium text-content truncate pr-4">{file.name}</h3>
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-content-subtle mt-1">
                                                     <span className="truncate max-w-[200px]">{file.file_name}</span>
                                                     <span>•</span>
                                                     <span>{new Date(file.created_at).toLocaleDateString()}</span>
@@ -257,11 +253,11 @@ export default function FilesPage() {
                                             </div>
                                         </div>
 
-                                        <div className="flex flex-wrap items-center gap-2 mt-4 lg:mt-0 w-full lg:w-auto pl-[4.5rem] lg:pl-0">
+                                        <div className="flex flex-wrap items-center gap-2 mt-4 lg:mt-0 w-full lg:w-auto pl-14 lg:pl-0">
                                             {isPreviewable(file.file_name) && (
                                                 <button
                                                     onClick={() => handlePreview(file)}
-                                                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 text-sm font-medium transition-colors"
+                                                    className="btn-secondary px-3 py-1.5 text-xs"
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                     Preview
@@ -269,24 +265,24 @@ export default function FilesPage() {
                                             )}
                                             <button
                                                 onClick={() => handleDownload(file)}
-                                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 text-sm font-medium transition-colors"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-accent-blue/10 text-accent-blue hover:bg-accent-blue/20 transition-colors"
                                             >
                                                 <Download className="w-4 h-4" />
                                                 Download
                                             </button>
                                             <button
                                                 onClick={() => handleVerify(file.id)}
-                                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 text-sm font-medium transition-colors"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-accent-green/10 text-accent-green hover:bg-accent-green/20 transition-colors"
                                             >
                                                 <ShieldCheck className="w-4 h-4" />
                                                 Verify
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(file.id)}
-                                                className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors ml-1"
+                                                className="p-2.5 text-content-subtle hover:text-accent-red hover:bg-accent-red/10 rounded-full transition-all"
                                                 title="Delete"
                                             >
-                                                <Trash2 className="w-4.5 h-4.5" />
+                                                <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </div>
@@ -295,9 +291,9 @@ export default function FilesPage() {
                                         <motion.div
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
-                                            className={`mt-4 p-3 rounded-lg border text-sm ${verificationStatus[file.id].valid
-                                                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                                                    : 'bg-destructive/10 border-destructive/20 text-destructive'
+                                            className={`mt-4 p-3 rounded-xl text-sm ${verificationStatus[file.id].valid
+                                                ? 'bg-accent-green/10 border border-accent-green/20 text-accent-green'
+                                                : 'bg-accent-red/10 border border-accent-red/20 text-accent-red'
                                                 }`}
                                         >
                                             <div className="flex items-center gap-2">
@@ -322,34 +318,34 @@ export default function FilesPage() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setShowModal(false)}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
                         />
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="relative w-full max-w-lg bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-lg bg-surface-elevated border border-surface-border rounded-2xl shadow-2xl overflow-hidden"
                         >
-                            <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                                <h2 className="text-xl font-bold">Upload Secure File</h2>
-                                <button onClick={() => setShowModal(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                            <div className="p-5 border-b border-surface-border flex items-center justify-between">
+                                <h2 className="text-lg font-semibold text-content">Upload Secure File</h2>
+                                <button onClick={() => setShowModal(false)} className="p-2 text-content-subtle hover:text-content hover:bg-surface-border rounded-full transition-all">
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
 
-                            <div className="p-6">
+                            <div className="p-5">
                                 {error && (
-                                    <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
+                                    <div className="mb-5 p-4 rounded-xl bg-accent-red/10 border border-accent-red/20 text-accent-red text-sm">
                                         {error}
                                     </div>
                                 )}
 
-                                <form onSubmit={handleSubmit} className="space-y-5">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-muted-foreground">File Label</label>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-content-muted mb-2">File Label</label>
                                         <input
                                             type="text"
-                                            className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                            className="input"
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             placeholder="E.g., Passport, Tax Document"
@@ -357,13 +353,13 @@ export default function FilesPage() {
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-muted-foreground">Select File</label>
-                                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-primary/50 hover:bg-white/5 transition-all group">
-                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground group-hover:text-primary transition-colors" />
-                                                <p className="text-sm text-muted-foreground group-hover:text-foreground">
-                                                    <span className="font-semibold">Click to upload</span> or drag and drop
+                                    <div>
+                                        <label className="block text-sm font-medium text-content-muted mb-2">Select File</label>
+                                        <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-surface-border rounded-xl cursor-pointer hover:border-accent-blue/50 hover:bg-surface-subtle transition-all group">
+                                            <div className="flex flex-col items-center justify-center py-4">
+                                                <UploadCloud className="w-8 h-8 mb-2 text-content-subtle group-hover:text-accent-blue transition-colors" />
+                                                <p className="text-sm text-content-muted group-hover:text-content">
+                                                    Click to upload
                                                 </p>
                                             </div>
                                             <input
@@ -374,25 +370,25 @@ export default function FilesPage() {
                                             />
                                         </label>
                                         {formData.file && (
-                                            <div className="flex items-center gap-2 p-3 bg-secondary/30 rounded-lg border border-white/5 text-sm">
-                                                <FileText className="w-4 h-4 text-primary" />
-                                                <span className="flex-1 truncate">{formData.file.name}</span>
-                                                <span className="text-muted-foreground">({(formData.file.size / 1024).toFixed(1)} KB)</span>
+                                            <div className="flex items-center gap-2 mt-3 p-3 bg-surface-subtle rounded-lg border border-surface-border text-sm">
+                                                <FileText className="w-4 h-4 text-accent-blue" />
+                                                <span className="flex-1 truncate text-content">{formData.file.name}</span>
+                                                <span className="text-content-subtle">({(formData.file.size / 1024).toFixed(1)} KB)</span>
                                             </div>
                                         )}
                                     </div>
 
-                                    <div className="flex gap-3 pt-2">
+                                    <div className="flex gap-3 pt-4">
                                         <button
                                             type="button"
-                                            className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors font-medium"
+                                            className="btn-secondary flex-1"
                                             onClick={() => setShowModal(false)}
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             type="submit"
-                                            className="flex-1 bg-primary text-primary-foreground rounded-lg px-4 py-2.5 font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                                            className="btn-primary flex-1"
                                             disabled={uploading}
                                         >
                                             {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Encrypt & Upload'}
@@ -420,23 +416,23 @@ export default function FilesPage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="relative w-full max-w-5xl h-[85vh] bg-card border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+                            className="relative w-full max-w-5xl h-[85vh] bg-surface-elevated border border-surface-border rounded-2xl shadow-2xl flex flex-col overflow-hidden"
                             onClick={e => e.stopPropagation()}
                         >
-                            <div className="p-4 border-b border-white/10 flex items-center justify-between bg-card z-10">
-                                <h2 className="text-lg font-semibold flex items-center gap-2">
-                                    <Eye className="w-4 h-4 text-primary" />
-                                    Preview: {previewData.name}
+                            <div className="p-4 border-b border-surface-border flex items-center justify-between bg-surface-elevated z-10">
+                                <h2 className="text-base font-medium text-content flex items-center gap-2">
+                                    <Eye className="w-4 h-4 text-accent-blue" />
+                                    {previewData.name}
                                 </h2>
-                                <button onClick={closePreview} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                                <button onClick={closePreview} className="p-2 text-content-subtle hover:text-content hover:bg-surface-border rounded-full transition-all">
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
-                            <div className="flex-1 bg-black/20 p-4 overflow-auto flex items-center justify-center">
+                            <div className="flex-1 bg-surface p-4 overflow-auto flex items-center justify-center">
                                 {previewData.type === 'pdf' ? (
                                     <iframe
                                         src={previewData.url}
-                                        className="w-full h-full rounded-lg border border-white/10 bg-white"
+                                        className="w-full h-full rounded-lg border border-surface-border bg-white"
                                         title="PDF Preview"
                                     />
                                 ) : (

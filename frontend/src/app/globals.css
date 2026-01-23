@@ -4,35 +4,46 @@
 
 @layer base {
   :root {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
+    /* Dark Mode Color Palette */
+    --background: 0 0% 7%;
+    --foreground: 0 0% 98%;
 
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 224 71% 4%;
-    --popover-foreground: 213 31% 91%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 98%;
 
-    --radius: 0.5rem;
+    --border: 0 0% 18%;
+    --input: 0 0% 15%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.75rem;
+
+    /* Accent Colors */
+    --color-blue: #4285F4;
+    --color-green: #34A853;
+    --color-yellow: #FBBC04;
+    --color-red: #EA4335;
+    --color-purple: #A142F4;
   }
 }
 
@@ -43,5 +54,146 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}
+
+@layer components {
+
+  /* Primary Button */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-6 py-2.5 rounded-full font-medium text-sm;
+    background-color: var(--color-blue);
+    @apply text-white;
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .btn-primary:hover {
+    background-color: #5A9BF6;
+    @apply shadow-lg;
+    box-shadow: 0 4px 20px rgba(66, 133, 244, 0.3);
+  }
+
+  .btn-primary:active {
+    background-color: #3B78E7;
+  }
+
+  .btn-primary:disabled {
+    @apply opacity-60 cursor-not-allowed;
+  }
+
+  /* Secondary Button */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-6 py-2.5 rounded-full font-medium text-sm;
+    @apply bg-neutral-800 text-neutral-300;
+    @apply border border-neutral-700;
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .btn-secondary:hover {
+    @apply bg-neutral-700 text-white;
+  }
+
+  /* Ghost Button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-6 py-2.5 rounded-full font-medium text-sm;
+    @apply bg-transparent text-neutral-400;
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .btn-ghost:hover {
+    @apply bg-neutral-800 text-white;
+  }
+
+  /* Card Style */
+  .card {
+    @apply bg-neutral-900 rounded-2xl;
+    @apply border border-neutral-800;
+    @apply transition-all duration-200;
+  }
+
+  .card-hover:hover {
+    @apply bg-neutral-800/50 border-neutral-700;
+  }
+
+  /* Input Style */
+  .input {
+    @apply w-full bg-neutral-900 text-white;
+    @apply border border-neutral-800 rounded-xl;
+    @apply px-4 py-3 text-sm;
+    @apply placeholder:text-neutral-500;
+    @apply transition-all duration-200;
+  }
+
+  .input:focus {
+    @apply outline-none;
+    border-color: var(--color-blue);
+    box-shadow: 0 0 0 1px var(--color-blue);
+  }
+
+  /* Icon Container */
+  .icon-container {
+    @apply w-10 h-10 rounded-full flex items-center justify-center;
+    @apply transition-all duration-200;
+  }
+
+  .icon-blue {
+    background-color: rgba(66, 133, 244, 0.1);
+    color: var(--color-blue);
+  }
+
+  .icon-green {
+    background-color: rgba(52, 168, 83, 0.1);
+    color: var(--color-green);
+  }
+
+  .icon-yellow {
+    background-color: rgba(251, 188, 4, 0.1);
+    color: var(--color-yellow);
+  }
+
+  .icon-red {
+    background-color: rgba(234, 67, 53, 0.1);
+    color: var(--color-red);
+  }
+
+  .icon-purple {
+    background-color: rgba(161, 66, 244, 0.1);
+    color: var(--color-purple);
+  }
+}
+
+/* Custom scrollbar for modals */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 2px;
 }

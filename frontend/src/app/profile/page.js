@@ -19,8 +19,8 @@ export default function ProfilePage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-background">
-                <div className="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+            <div className="flex items-center justify-center min-h-screen bg-surface">
+                <div className="w-10 h-10 border-4 border-accent-blue/30 border-t-accent-blue rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -29,53 +29,35 @@ export default function ProfilePage() {
         return null;
     }
 
-    // Generate initials from username
     const getInitials = (name) => {
         if (!name) return 'U';
         return name.charAt(0).toUpperCase();
     };
 
-    // Generate a consistent gradient based on username
-    const getGradientClass = (name) => {
-        const gradients = [
-            'from-blue-500 to-indigo-600',
-            'from-purple-500 to-pink-600',
-            'from-emerald-500 to-teal-600',
-            'from-orange-500 to-red-600',
-            'from-cyan-500 to-blue-600',
-        ];
-        const index = name ? name.charCodeAt(0) % gradients.length : 0;
-        return gradients[index];
-    };
-
     return (
-        <div className="min-h-screen bg-background pb-12">
+        <div className="min-h-screen bg-surface pb-12">
             <Navbar />
 
-            <main className="container mx-auto px-4 py-8">
+            <main className="container mx-auto px-4 py-10">
                 {/* Profile Header Card */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-card border border-white/10 rounded-2xl p-8 mb-8 relative overflow-hidden"
+                    className="card p-8 mb-6"
                 >
-                    {/* Background decoration */}
-                    <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-r from-primary/20 via-blue-500/20 to-indigo-500/20 opacity-50" />
-                    <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-card" />
-
-                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+                    <div className="flex flex-col md:flex-row items-center gap-6">
                         {/* Avatar */}
-                        <div className={`w-28 h-28 rounded-full bg-gradient-to-br ${getGradientClass(user?.username)} flex items-center justify-center shadow-2xl shadow-primary/30 ring-4 ring-card`}>
-                            <span className="text-4xl font-bold text-white">
+                        <div className="w-20 h-20 rounded-full bg-accent-blue flex items-center justify-center">
+                            <span className="text-3xl font-semibold text-content">
                                 {getInitials(user?.username)}
                             </span>
                         </div>
 
                         {/* User Info */}
                         <div className="text-center md:text-left flex-1">
-                            <h1 className="text-3xl font-bold mb-2">{user?.username}</h1>
-                            <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                            <h1 className="text-2xl font-semibold text-content mb-2">{user?.username}</h1>
+                            <div className="flex items-center justify-center md:justify-start gap-2">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-accent-green/10 text-accent-green border border-accent-green/20">
                                     <Shield className="w-3.5 h-3.5" />
                                     Account Protected
                                 </span>
@@ -84,43 +66,39 @@ export default function ProfilePage() {
                     </div>
                 </motion.div>
 
-                <div className="grid lg:grid-cols-2 gap-6">
+                <div className="grid lg:grid-cols-2 gap-4">
                     {/* Account Details Card */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="bg-card border border-white/10 rounded-xl overflow-hidden"
+                        className="card overflow-hidden"
                     >
-                        <div className="p-6 border-b border-white/10 flex items-center gap-3">
-                            <div className="p-2.5 rounded-lg bg-blue-500/10 text-blue-500">
+                        <div className="p-5 border-b border-surface-subtle flex items-center gap-3">
+                            <div className="icon-container icon-blue">
                                 <User className="w-5 h-5" />
                             </div>
-                            <h3 className="text-lg font-semibold">Account Details</h3>
+                            <h3 className="text-base font-medium text-content">Account Details</h3>
                         </div>
 
-                        <div className="divide-y divide-white/5">
-                            <div className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center">
-                                        <User className="w-4 h-4 text-muted-foreground" />
-                                    </div>
-                                    <div>
-                                        <div className="text-sm text-muted-foreground">Username</div>
-                                        <div className="font-medium">{user?.username}</div>
-                                    </div>
+                        <div className="divide-y divide-surface-subtle">
+                            <div className="p-4 flex items-center gap-4 hover:bg-surface-elevated transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-surface-subtle flex items-center justify-center">
+                                    <User className="w-4 h-4 text-content-subtle" />
+                                </div>
+                                <div>
+                                    <div className="text-xs text-content-muted">Username</div>
+                                    <div className="font-medium text-content">{user?.username}</div>
                                 </div>
                             </div>
 
-                            <div className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center">
-                                        <Fingerprint className="w-4 h-4 text-muted-foreground" />
-                                    </div>
-                                    <div>
-                                        <div className="text-sm text-muted-foreground">User ID</div>
-                                        <div className="font-mono text-sm">{user?.id}</div>
-                                    </div>
+                            <div className="p-4 flex items-center gap-4 hover:bg-surface-elevated transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-surface-subtle flex items-center justify-center">
+                                    <Fingerprint className="w-4 h-4 text-content-subtle" />
+                                </div>
+                                <div>
+                                    <div className="text-xs text-content-muted">User ID</div>
+                                    <div className="font-mono text-sm text-content">{user?.id}</div>
                                 </div>
                             </div>
                         </div>
@@ -131,41 +109,41 @@ export default function ProfilePage() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-card border border-white/10 rounded-xl overflow-hidden"
+                        className="card overflow-hidden"
                     >
-                        <div className="p-6 border-b border-white/10 flex items-center gap-3">
-                            <div className="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-500">
+                        <div className="p-5 border-b border-surface-subtle flex items-center gap-3">
+                            <div className="icon-container icon-green">
                                 <ShieldCheck className="w-5 h-5" />
                             </div>
-                            <h3 className="text-lg font-semibold">Security Features</h3>
+                            <h3 className="text-base font-medium text-content">Security Features</h3>
                         </div>
 
-                        <div className="divide-y divide-white/5">
+                        <div className="divide-y divide-surface-subtle">
                             <SecurityFeature
                                 icon={<Lock className="w-4 h-4" />}
-                                iconColor="text-emerald-500"
-                                iconBg="bg-emerald-500/10"
+                                iconColor="text-accent-green"
+                                iconBg="bg-accent-green/10"
                                 title="Password Hashing"
                                 meta="bcrypt with automatic salt"
                             />
                             <SecurityFeature
                                 icon={<Key className="w-4 h-4" />}
-                                iconColor="text-blue-500"
-                                iconBg="bg-blue-500/10"
+                                iconColor="text-accent-blue"
+                                iconBg="bg-accent-blue/10"
                                 title="Data Encryption"
                                 meta="AES-256-GCM"
                             />
                             <SecurityFeature
                                 icon={<FileSignature className="w-4 h-4" />}
-                                iconColor="text-purple-500"
-                                iconBg="bg-purple-500/10"
+                                iconColor="text-accent-purple"
+                                iconBg="bg-accent-purple/10"
                                 title="Digital Signatures"
                                 meta="RSA-2048 PSS"
                             />
                             <SecurityFeature
                                 icon={<Fingerprint className="w-4 h-4" />}
-                                iconColor="text-orange-500"
-                                iconBg="bg-orange-500/10"
+                                iconColor="text-accent-yellow"
+                                iconBg="bg-accent-yellow/10"
                                 title="Session Management"
                                 meta="JWT with HS256"
                             />
@@ -179,17 +157,17 @@ export default function ProfilePage() {
 
 function SecurityFeature({ icon, iconColor, iconBg, title, meta }) {
     return (
-        <div className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors group">
-            <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-lg ${iconBg} flex items-center justify-center ${iconColor}`}>
+        <div className="p-4 flex items-center justify-between hover:bg-surface-elevated transition-colors group">
+            <div className="flex items-center gap-4">
+                <div className={`w-10 h-10 rounded-full ${iconBg} flex items-center justify-center ${iconColor}`}>
                     {icon}
                 </div>
                 <div>
-                    <div className="font-medium">{title}</div>
-                    <div className="text-sm text-muted-foreground">{meta}</div>
+                    <div className="font-medium text-content text-sm">{title}</div>
+                    <div className="text-xs text-content-subtle">{meta}</div>
                 </div>
             </div>
-            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-accent-green/10 text-accent-green border border-accent-green/20">
                 Active
             </span>
         </div>

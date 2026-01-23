@@ -69,7 +69,6 @@ export default function PasswordsPage() {
 
         try {
             if (editingPassword) {
-                // Update existing password
                 await vaultAPI.updatePassword(
                     editingPassword.id,
                     formData.name,
@@ -78,7 +77,6 @@ export default function PasswordsPage() {
                     formData.password
                 );
             } else {
-                // Create new password
                 await vaultAPI.storePassword(
                     formData.name,
                     formData.website,
@@ -146,25 +144,25 @@ export default function PasswordsPage() {
 
     if (loading || !isAuthenticated) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-background">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <div className="flex items-center justify-center min-h-screen bg-surface">
+                <Loader2 className="w-8 h-8 animate-spin text-accent-blue" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-surface">
             <Navbar />
 
-            <main className="container mx-auto px-4 py-8">
+            <main className="container mx-auto px-4 py-10">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold mb-2">Password Vault</h1>
-                        <p className="text-muted-foreground">Securely stored with AES-256 encryption</p>
+                        <h1 className="text-2xl font-semibold text-content mb-1">Password Vault</h1>
+                        <p className="text-content-muted text-sm">Securely stored with AES-256 encryption</p>
                     </div>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="btn-primary flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-medium shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all active:scale-95"
+                        className="btn-primary"
                     >
                         <Plus className="w-5 h-5" />
                         Add Password
@@ -172,10 +170,10 @@ export default function PasswordsPage() {
                 </div>
 
                 <div className="relative mb-6">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-content-subtle" />
                     <input
                         type="text"
-                        className="w-full bg-card border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder:text-muted-foreground/50"
+                        className="input pl-12"
                         placeholder="Search passwords by name, website, or username..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -183,29 +181,26 @@ export default function PasswordsPage() {
                 </div>
 
                 {filteredPasswords.length === 0 ? (
-                    <div className="text-center py-20 bg-card/30 rounded-2xl border border-white/5 border-dashed">
-                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-secondary mb-6">
-                            <Key className="w-10 h-10 text-muted-foreground" />
+                    <div className="card p-16 text-center border-dashed">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface-subtle mb-6">
+                            <Key className="w-8 h-8 text-content-subtle" />
                         </div>
-                        <h3 className="text-xl font-medium mb-2">
+                        <h3 className="text-lg font-medium text-content mb-2">
                             {passwords.length === 0 ? 'No passwords stored yet' : 'No matching passwords'}
                         </h3>
-                        <p className="text-muted-foreground max-w-sm mx-auto mb-6">
+                        <p className="text-content-muted text-sm max-w-sm mx-auto mb-6">
                             {passwords.length === 0
                                 ? 'Your vault is empty. Add your first password to keep it secure.'
-                                : 'Try adjusting your search terms to find what you looking for.'}
+                                : 'Try adjusting your search terms to find what you\'re looking for.'}
                         </p>
                         {passwords.length === 0 && (
-                            <button
-                                onClick={() => setShowModal(true)}
-                                className="text-primary hover:text-primary/80 font-medium hover:underline"
-                            >
+                            <button onClick={() => setShowModal(true)} className="btn-primary">
                                 Add your first password
                             </button>
                         )}
                     </div>
                 ) : (
-                    <div className="grid gap-4">
+                    <div className="space-y-2">
                         <AnimatePresence>
                             {filteredPasswords.map((pwd) => (
                                 <motion.div
@@ -214,16 +209,16 @@ export default function PasswordsPage() {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
-                                    className="group bg-card border border-white/5 hover:border-white/10 rounded-xl p-4 transition-all hover:shadow-lg hover:shadow-black/20"
+                                    className="card card-hover p-4 group"
                                 >
                                     <div className="flex flex-col md:flex-row items-start md:items-center gap-4 justify-between">
                                         <div className="flex items-center gap-4 flex-1 min-w-0">
-                                            <div className="p-3 rounded-lg bg-blue-500/10 text-blue-500 shrink-0">
-                                                <Key className="w-6 h-6" />
+                                            <div className="icon-container icon-blue shrink-0">
+                                                <Key className="w-5 h-5" />
                                             </div>
                                             <div className="min-w-0">
-                                                <h3 className="font-semibold text-lg truncate pr-4">{pwd.name}</h3>
-                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
+                                                <h3 className="font-medium text-content truncate pr-4">{pwd.name}</h3>
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-content-subtle mt-1">
                                                     <div className="flex items-center gap-1.5">
                                                         <User className="w-3.5 h-3.5" />
                                                         <span className="truncate max-w-[150px]">{pwd.username}</span>
@@ -242,23 +237,21 @@ export default function PasswordsPage() {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0 pl-[4.5rem] md:pl-0">
-                                            <div className="flex-1 md:flex-none relative group/pass">
-                                                <div className="bg-secondary/50 rounded-lg px-3 py-2 min-w-[140px] font-mono text-sm flex items-center justify-between border border-transparent group-hover/pass:border-white/10 transition-colors">
-                                                    <span>
-                                                        {visiblePasswords[pwd.id] ? pwd.password : '••••••••••••'}
-                                                    </span>
-                                                    <div className="flex items-center gap-1 ml-2">
+                                        <div className="flex items-center gap-2 w-full md:w-auto mt-4 md:mt-0 pl-14 md:pl-0">
+                                            <div className="flex-1 md:flex-none relative">
+                                                <div className="bg-surface-elevated border border-surface-border rounded-lg px-3 py-2 min-w-[140px] font-mono text-sm text-content flex items-center justify-between gap-2">
+                                                    <span>{visiblePasswords[pwd.id] ? pwd.password : '••••••••••••'}</span>
+                                                    <div className="flex items-center gap-0.5">
                                                         <button
                                                             onClick={() => copyToClipboard(pwd.password, pwd.id)}
-                                                            className="p-1 hover:text-primary transition-colors rounded"
+                                                            className="p-1.5 text-content-subtle hover:text-accent-blue transition-colors rounded"
                                                             title="Copy"
                                                         >
-                                                            {copiedId === pwd.id ? <span className="text-green-500 text-xs font-bold">✓</span> : <Copy className="w-3.5 h-3.5" />}
+                                                            {copiedId === pwd.id ? <span className="text-accent-green text-xs font-bold">✓</span> : <Copy className="w-3.5 h-3.5" />}
                                                         </button>
                                                         <button
                                                             onClick={() => togglePasswordVisibility(pwd.id)}
-                                                            className="p-1 hover:text-primary transition-colors rounded"
+                                                            className="p-1.5 text-content-subtle hover:text-accent-blue transition-colors rounded"
                                                             title={visiblePasswords[pwd.id] ? 'Hide' : 'Show'}
                                                         >
                                                             {visiblePasswords[pwd.id] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -268,17 +261,17 @@ export default function PasswordsPage() {
                                             </div>
                                             <button
                                                 onClick={() => openEditModal(pwd)}
-                                                className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                                                className="p-2.5 text-content-subtle hover:text-accent-blue hover:bg-accent-blue/10 rounded-full transition-all"
                                                 title="Edit"
                                             >
                                                 <Pencil className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(pwd.id)}
-                                                className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                                                className="p-2.5 text-content-subtle hover:text-accent-red hover:bg-accent-red/10 rounded-full transition-all"
                                                 title="Delete"
                                             >
-                                                <Trash2 className="w-4.5 h-4.5" />
+                                                <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </div>
@@ -298,39 +291,39 @@ export default function PasswordsPage() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={closeModal}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
                         />
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="relative w-full max-w-lg bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                            className="relative w-full max-w-lg bg-surface-elevated border border-surface-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
                         >
-                            <div className="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-card z-10">
-                                <h2 className="text-xl font-bold">
+                            <div className="p-5 border-b border-surface-border flex items-center justify-between sticky top-0 bg-surface-elevated z-10">
+                                <h2 className="text-lg font-semibold text-content">
                                     {editingPassword ? 'Edit Password' : 'Add New Password'}
                                 </h2>
                                 <button
                                     onClick={closeModal}
-                                    className="p-2 hover:bg-white/5 rounded-full transition-colors"
+                                    className="p-2 text-content-subtle hover:text-content hover:bg-surface-border rounded-full transition-all"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
 
-                            <div className="p-6 overflow-y-auto custom-scrollbar">
+                            <div className="p-5 overflow-y-auto custom-scrollbar">
                                 {error && (
-                                    <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
+                                    <div className="mb-5 p-4 rounded-xl bg-accent-red/10 border border-accent-red/20 text-accent-red text-sm">
                                         {error}
                                     </div>
                                 )}
 
-                                <form onSubmit={handleSubmit} className="space-y-5">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-muted-foreground">Label / Name</label>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-content-muted mb-2">Label / Name</label>
                                         <input
                                             type="text"
-                                            className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                            className="input"
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             placeholder="e.g., Netflix, Gmail"
@@ -338,22 +331,22 @@ export default function PasswordsPage() {
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-muted-foreground">Website (Optional)</label>
+                                    <div>
+                                        <label className="block text-sm font-medium text-content-muted mb-2">Website (Optional)</label>
                                         <input
                                             type="text"
-                                            className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                            className="input"
                                             value={formData.website}
                                             onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                                             placeholder="e.g., netflix.com"
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-muted-foreground">Username / Email</label>
+                                    <div>
+                                        <label className="block text-sm font-medium text-content-muted mb-2">Username / Email</label>
                                         <input
                                             type="text"
-                                            className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                            className="input"
                                             value={formData.username}
                                             onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                                             placeholder="user@example.com"
@@ -361,20 +354,20 @@ export default function PasswordsPage() {
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <label className="text-sm font-medium text-muted-foreground">Password</label>
+                                    <div>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <label className="text-sm font-medium text-content-muted">Password</label>
                                             <button
                                                 type="button"
-                                                className="text-xs font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                                                className="text-xs font-medium text-accent-blue hover:text-accent-blue-hover transition-colors"
                                                 onClick={() => setShowGenerator(!showGenerator)}
                                             >
-                                                {showGenerator ? 'Close Generator' : 'Suggest Strong Password'}
+                                                {showGenerator ? 'Close Generator' : 'Generate Password'}
                                             </button>
                                         </div>
                                         <input
                                             type="text"
-                                            className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-2.5 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                            className="input font-mono"
                                             value={formData.password}
                                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                             placeholder="Enter password"
@@ -398,20 +391,20 @@ export default function PasswordsPage() {
                                         )}
                                     </AnimatePresence>
 
-                                    <div className="flex gap-3 pt-2">
+                                    <div className="flex gap-3 pt-4">
                                         <button
                                             type="button"
-                                            className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors font-medium"
+                                            className="btn-secondary flex-1"
                                             onClick={closeModal}
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             type="submit"
-                                            className="flex-1 bg-primary text-primary-foreground rounded-lg px-4 py-2.5 font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                                            className="btn-primary flex-1"
                                             disabled={saving}
                                         >
-                                            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : (editingPassword ? 'Update Password' : 'Save Password')}
+                                            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : (editingPassword ? 'Update' : 'Save')}
                                         </button>
                                     </div>
                                 </form>

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/context/AuthContext';
-import { Shield, Lock, FileSignature, Smartphone, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Shield, Lock, FileSignature, Smartphone, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Home() {
@@ -33,65 +33,50 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <main className="min-h-screen bg-surface text-content overflow-x-hidden">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        {/* Abstract Background Shapes */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl -z-10 opacity-20 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full blur-[128px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500 rounded-full blur-[128px]" />
-        </div>
-
+      <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-40 overflow-hidden">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial="hidden"
             animate="visible"
             variants={containerVariants}
-            className="max-w-4xl mx-auto"
+            className="max-w-3xl mx-auto"
           >
-            <motion.div variants={itemVariants} className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium text-blue-400 backdrop-blur-sm">
+            <motion.div
+              variants={itemVariants}
+              className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-subtle border border-surface-border text-sm font-medium text-accent-blue"
+            >
               <Shield className="w-4 h-4" />
-              <span>Military-Grade Security Standard</span>
+              <span>Military-Grade Security</span>
             </motion.div>
 
-            <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl font-bold tracking-tight mb-8">
+            <motion.h1 variants={itemVariants} className="text-4xl md:text-6xl font-semibold tracking-tight mb-6">
               Your Digital Vault,<br />
-              <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                Unbreakable.
-              </span>
+              <span className="text-accent-blue">Unbreakable.</span>
             </motion.h1>
 
-            <motion.p variants={itemVariants} className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+            <motion.p variants={itemVariants} className="text-lg text-content-muted mb-10 max-w-xl mx-auto leading-relaxed">
               Store passwords and files with military-grade encryption.
-              Multi-factor authentication, digital signatures, and tamper detection
-              keep your data secure.
+              Multi-factor authentication and digital signatures keep your data secure.
             </motion.p>
 
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4">
               {isAuthenticated ? (
-                <Link
-                  href="/dashboard"
-                  className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)] hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.6)]"
-                >
+                <Link href="/dashboard" className="btn-primary">
                   Go to Dashboard
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               ) : (
                 <>
-                  <Link
-                    href="/register"
-                    className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-all shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)] hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.6)]"
-                  >
+                  <Link href="/register" className="btn-primary">
                     Get Started Free
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="w-4 h-4" />
                   </Link>
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/5 text-foreground font-semibold rounded-lg hover:bg-white/10 transition-all border border-white/10"
-                  >
-                    Login
+                  <Link href="/login" className="btn-secondary">
+                    Sign in
                   </Link>
                 </>
               )}
@@ -101,43 +86,46 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-white/5 relative">
-        <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
+      <section className="py-20 bg-surface-elevated">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Security Features</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="text-2xl font-semibold text-content mb-3">Security Features</h2>
+            <p className="text-content-muted max-w-lg mx-auto text-sm">
               We use the most advanced encryption standards to ensure your data remains yours alone.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             <FeatureCard
-              icon={<Shield className="w-8 h-8 text-blue-400" />}
+              icon={<Shield className="w-6 h-6" />}
+              iconColor="text-accent-blue"
+              iconBg="bg-accent-blue/10"
               title="AES-256 Encryption"
               description="Your files and passwords are encrypted with military-grade AES-256-GCM encryption."
-              color="bg-blue-500/10"
               delay={0}
             />
             <FeatureCard
-              icon={<Lock className="w-8 h-8 text-indigo-400" />}
+              icon={<Lock className="w-6 h-6" />}
+              iconColor="text-accent-green"
+              iconBg="bg-accent-green/10"
               title="bcrypt Hashing"
               description="Passwords are hashed with bcrypt and automatic salt generation for maximum security."
-              color="bg-indigo-500/10"
               delay={0.1}
             />
             <FeatureCard
-              icon={<FileSignature className="w-8 h-8 text-purple-400" />}
+              icon={<FileSignature className="w-6 h-6" />}
+              iconColor="text-accent-purple"
+              iconBg="bg-accent-purple/10"
               title="Digital Signatures"
               description="RSA-2048 signatures detect any tampering with your stored files instantly."
-              color="bg-purple-500/10"
               delay={0.2}
             />
             <FeatureCard
-              icon={<Smartphone className="w-8 h-8 text-emerald-400" />}
+              icon={<Smartphone className="w-6 h-6" />}
+              iconColor="text-accent-yellow"
+              iconBg="bg-accent-yellow/10"
               title="Multi-Factor Auth"
               description="OTP verification adds an extra critical layer of security to your account."
-              color="bg-emerald-500/10"
               delay={0.3}
             />
           </div>
@@ -150,20 +138,20 @@ export default function Home() {
   );
 }
 
-function FeatureCard({ icon, title, description, color, delay }) {
+function FeatureCard({ icon, iconColor, iconBg, title, description, delay }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       viewport={{ once: true }}
-      className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-all hover:bg-white/10"
+      className="card card-hover p-6"
     >
-      <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 ${color}`}>
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${iconBg} ${iconColor}`}>
         {icon}
       </div>
-      <h3 className="text-xl font-semibold mb-3">{title}</h3>
-      <p className="text-muted-foreground leading-relaxed text-sm">
+      <h3 className="text-base font-medium text-content mb-2">{title}</h3>
+      <p className="text-content-muted text-sm leading-relaxed">
         {description}
       </p>
     </motion.div>

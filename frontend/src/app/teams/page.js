@@ -24,12 +24,10 @@ export default function TeamsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [modalError, setModalError] = useState(null);
 
-    // Confirmation Modal State
     const [memberToRemove, setMemberToRemove] = useState(null);
     const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] = useState(false);
     const router = useRouter();
 
-    // Form states
     const [newTeamName, setNewTeamName] = useState('');
     const [newTeamDesc, setNewTeamDesc] = useState('');
     const [newMemberUsername, setNewMemberUsername] = useState('');
@@ -48,7 +46,6 @@ export default function TeamsPage() {
         }
     }, [isAuthenticated]);
 
-    // Clear success message after 3 seconds
     useEffect(() => {
         if (success) {
             const timer = setTimeout(() => setSuccess(''), 3000);
@@ -105,9 +102,8 @@ export default function TeamsPage() {
             if (!newMemberUsername) return;
 
             const updatedTeam = await teamsAPI.addMember(selectedTeam.id, newMemberUsername, newMemberRole);
-            // Update the selected team's member count and then re-fetch members for the selected team
             setTeams(teams.map(t => t.id === selectedTeam.id ? { ...t, member_count: updatedTeam.member_count } : t));
-            selectTeam(selectedTeam); // Re-fetch members and shared files for the selected team
+            selectTeam(selectedTeam);
             setIsAddMemberModalOpen(false);
             setNewMemberUsername('');
             setSuccess('Member added!');
@@ -125,9 +121,8 @@ export default function TeamsPage() {
         if (!memberToRemove || !selectedTeam) return;
         try {
             await teamsAPI.removeMember(selectedTeam.id, memberToRemove);
-            // Update the selected team's member count and then re-fetch members for the selected team
             setTeams(teams.map(t => t.id === selectedTeam.id ? { ...t, member_count: t.member_count - 1 } : t));
-            selectTeam(selectedTeam); // Re-fetch members and shared files for the selected team
+            selectTeam(selectedTeam);
             setIsRemoveMemberModalOpen(false);
             setMemberToRemove(null);
             setSuccess('Member removed!');
@@ -202,7 +197,6 @@ export default function TeamsPage() {
         }
     };
 
-    // Permission helpers
     const isOwner = selectedTeam?.my_role === 'owner';
     const isAdmin = selectedTeam?.my_role === 'admin';
     const canManageMembers = isOwner;
@@ -210,8 +204,8 @@ export default function TeamsPage() {
 
     if (authLoading || loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-background">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <div className="flex items-center justify-center min-h-screen bg-surface">
+                <Loader2 className="w-8 h-8 animate-spin text-accent-blue" />
             </div>
         );
     }
@@ -219,31 +213,31 @@ export default function TeamsPage() {
     if (!isAuthenticated) return null;
 
     return (
-        <div className="min-h-screen bg-background pb-12">
+        <div className="min-h-screen bg-surface pb-12">
             <Navbar />
 
-            <main className="container mx-auto px-4 py-8">
+            <main className="container mx-auto px-4 py-10">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold mb-2">Teams</h1>
-                        <p className="text-muted-foreground">Share encrypted files with your team securely</p>
+                        <h1 className="text-2xl font-semibold text-content mb-1">Teams</h1>
+                        <p className="text-content-muted text-sm">Share encrypted files with your team securely</p>
                     </div>
                     <button
                         onClick={() => setShowCreateModal(true)}
-                        className="btn-primary flex items-center gap-2"
+                        className="btn-primary"
                     >
                         <Plus className="w-4 h-4" />
                         Create Team
                     </button>
                 </div>
 
-                {/* Role Legend mobile/accordion could be better, but keeping simple for now */}
-                <div className="mb-8 p-4 rounded-xl bg-secondary/20 border border-white/5 text-sm">
-                    <strong className="text-foreground">Role Permissions:</strong>
-                    <ul className="mt-2 space-y-1 text-muted-foreground list-disc list-inside">
-                        <li><strong className="text-emerald-500">Owner:</strong> Full access (manage members, delete team, share files)</li>
-                        <li><strong className="text-blue-500">Admin:</strong> Share files, view/download</li>
-                        <li><strong className="text-muted-foreground">Member:</strong> View and download files only</li>
+                {/* Role Legend */}
+                <div className="mb-8 p-4 rounded-xl bg-surface-elevated border border-surface-border text-sm">
+                    <strong className="text-content">Role Permissions:</strong>
+                    <ul className="mt-2 space-y-1 text-content-muted list-disc list-inside">
+                        <li><strong className="text-accent-green">Owner:</strong> Full access (manage members, delete team, share files)</li>
+                        <li><strong className="text-accent-blue">Admin:</strong> Share files, view/download</li>
+                        <li><strong className="text-content-muted">Member:</strong> View and download files only</li>
                     </ul>
                 </div>
 
@@ -253,7 +247,7 @@ export default function TeamsPage() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium"
+                            className="mb-6 p-4 rounded-xl bg-accent-red/10 border border-accent-red/20 text-accent-red text-sm font-medium"
                         >
                             {error}
                         </motion.div>
@@ -263,7 +257,7 @@ export default function TeamsPage() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="mb-6 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium"
+                            className="mb-6 p-4 rounded-xl bg-accent-green/10 border border-accent-green/20 text-accent-green text-sm font-medium"
                         >
                             {success}
                         </motion.div>
@@ -273,12 +267,12 @@ export default function TeamsPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
                     {/* Teams List (Left Sidebar) */}
                     <div className="lg:col-span-1 space-y-4">
-                        <h3 className="text-lg font-semibold px-2">My Teams</h3>
+                        <h3 className="text-lg font-semibold text-content px-2">My Teams</h3>
                         <div className="space-y-2">
                             {teams.length === 0 ? (
-                                <div className="text-center p-8 bg-card border border-white/10 rounded-xl">
-                                    <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-                                    <p className="text-sm text-muted-foreground">No teams yet</p>
+                                <div className="text-center p-8 card">
+                                    <Users className="w-8 h-8 text-content-subtle mx-auto mb-2 opacity-50" />
+                                    <p className="text-sm text-content-muted">No teams yet</p>
                                 </div>
                             ) : (
                                 teams.map(team => (
@@ -287,18 +281,18 @@ export default function TeamsPage() {
                                         onClick={() => selectTeam(team)}
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
-                                        className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedTeam?.id === team.id ? 'bg-primary/20 border-primary/50 shadow-lg shadow-primary/10' : 'bg-card border-white/10 hover:border-white/20'}`}
+                                        className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedTeam?.id === team.id ? 'bg-accent-blue/10 border-accent-blue/50 shadow-lg shadow-accent-blue/10' : 'bg-surface-elevated border-surface-border hover:border-surface-border'}`}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="p-2 rounded-lg bg-secondary/50">
-                                                <Users className="w-5 h-5 text-primary" />
+                                            <div className="p-2 rounded-lg bg-surface-subtle">
+                                                <Users className="w-5 h-5 text-accent-blue" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <div className="font-medium truncate">{team.name}</div>
-                                                <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                                <div className="font-medium text-content truncate">{team.name}</div>
+                                                <div className="text-xs text-content-muted flex items-center gap-2">
                                                     <span>{team.member_count} members</span>
                                                     <span>•</span>
-                                                    <span className="capitalize text-primary/80">{team.my_role}</span>
+                                                    <span className="capitalize text-accent-blue/80">{team.my_role}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -317,16 +311,16 @@ export default function TeamsPage() {
                                 className="space-y-6"
                             >
                                 {/* Header Card */}
-                                <div className="bg-card border border-white/10 rounded-xl p-6 relative overflow-hidden">
+                                <div className="card p-6 relative overflow-hidden">
                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
                                         <div>
-                                            <h2 className="text-2xl font-bold mb-1">{selectedTeam.name}</h2>
-                                            <p className="text-muted-foreground">{selectedTeam.description || 'No description provided'}</p>
+                                            <h2 className="text-2xl font-bold text-content mb-1">{selectedTeam.name}</h2>
+                                            <p className="text-content-muted">{selectedTeam.description || 'No description provided'}</p>
                                         </div>
                                         {isOwner && (
                                             <button
                                                 onClick={handleDeleteTeam}
-                                                className="btn-danger flex items-center gap-2 text-sm px-3 py-2"
+                                                className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg bg-accent-red/10 text-accent-red hover:bg-accent-red/20 transition-colors"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                                 Delete Team
@@ -336,33 +330,33 @@ export default function TeamsPage() {
                                 </div>
 
                                 {/* Members Section */}
-                                <div className="bg-card border border-white/10 rounded-xl overflow-hidden">
-                                    <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                                        <h3 className="font-semibold text-lg flex items-center gap-2">
-                                            <Users className="w-5 h-5 text-primary" />
+                                <div className="card overflow-hidden">
+                                    <div className="p-6 border-b border-surface-subtle flex items-center justify-between">
+                                        <h3 className="font-semibold text-content flex items-center gap-2">
+                                            <Users className="w-5 h-5 text-accent-blue" />
                                             Team Members
-                                            <span className="bg-secondary/50 text-xs px-2 py-0.5 rounded-full text-muted-foreground">{members.length}</span>
+                                            <span className="bg-surface-subtle text-xs px-2 py-0.5 rounded-full text-content-muted">{members.length}</span>
                                         </h3>
                                         {canManageMembers && (
                                             <button
                                                 onClick={() => setIsAddMemberModalOpen(true)}
-                                                className="btn-secondary text-sm px-3 py-2 flex items-center gap-2"
+                                                className="btn-secondary text-sm px-3 py-2"
                                             >
                                                 <UserPlus className="w-4 h-4" />
                                                 Add Member
                                             </button>
                                         )}
                                     </div>
-                                    <div className="divide-y divide-white/5">
+                                    <div className="divide-y divide-surface-subtle">
                                         {members.map(member => (
-                                            <div key={member.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
+                                            <div key={member.id} className="p-4 flex items-center justify-between hover:bg-surface-elevated transition-colors">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary/20 to-blue-500/20 flex items-center justify-center text-primary font-bold text-lg">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-accent-blue/20 to-accent-purple/20 flex items-center justify-center text-accent-blue font-bold text-lg">
                                                         {member.username.charAt(0).toUpperCase()}
                                                     </div>
                                                     <div>
-                                                        <div className="font-medium">{member.username}</div>
-                                                        <div className={`text-xs px-2 py-0.5 rounded-full inline-block mt-1 ${member.role === 'owner' ? 'bg-emerald-500/10 text-emerald-500' : member.role === 'admin' ? 'bg-blue-500/10 text-blue-500' : 'bg-secondary text-muted-foreground'}`}>
+                                                        <div className="font-medium text-content">{member.username}</div>
+                                                        <div className={`text-xs px-2 py-0.5 rounded-full inline-block mt-1 ${member.role === 'owner' ? 'bg-accent-green/10 text-accent-green' : member.role === 'admin' ? 'bg-accent-blue/10 text-accent-blue' : 'bg-surface-subtle text-content-muted'}`}>
                                                             {member.role}
                                                         </div>
                                                     </div>
@@ -371,7 +365,7 @@ export default function TeamsPage() {
                                                 {canManageMembers && member.role !== 'owner' && (
                                                     <button
                                                         onClick={() => handleRemoveMember(member.user_id)}
-                                                        className="p-2 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-lg transition-colors"
+                                                        className="p-2 hover:bg-accent-red/10 text-content-muted hover:text-accent-red rounded-lg transition-colors"
                                                         title="Remove Member"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
@@ -383,17 +377,17 @@ export default function TeamsPage() {
                                 </div>
 
                                 {/* Shared Files Section */}
-                                <div className="bg-card border border-white/10 rounded-xl overflow-hidden">
-                                    <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                                        <h3 className="font-semibold text-lg flex items-center gap-2">
-                                            <Share2 className="w-5 h-5 text-primary" />
+                                <div className="card overflow-hidden">
+                                    <div className="p-6 border-b border-surface-subtle flex items-center justify-between">
+                                        <h3 className="font-semibold text-content flex items-center gap-2">
+                                            <Share2 className="w-5 h-5 text-accent-blue" />
                                             Shared Files
-                                            <span className="bg-secondary/50 text-xs px-2 py-0.5 rounded-full text-muted-foreground">{sharedFiles.length}</span>
+                                            <span className="bg-surface-subtle text-xs px-2 py-0.5 rounded-full text-content-muted">{sharedFiles.length}</span>
                                         </h3>
                                         {canShareFiles && (
                                             <button
                                                 onClick={openShareModal}
-                                                className="btn-primary text-sm px-3 py-2 flex items-center gap-2"
+                                                className="btn-primary text-sm px-3 py-2"
                                             >
                                                 <Plus className="w-4 h-4" />
                                                 Share File
@@ -402,21 +396,21 @@ export default function TeamsPage() {
                                     </div>
 
                                     {sharedFiles.length === 0 ? (
-                                        <div className="p-8 text-center text-muted-foreground">
+                                        <div className="p-8 text-center text-content-muted">
                                             <FileText className="w-12 h-12 mx-auto mb-3 opacity-20" />
                                             <p>No files have been shared with this team yet.</p>
                                         </div>
                                     ) : (
-                                        <div className="divide-y divide-white/5">
+                                        <div className="divide-y divide-surface-subtle">
                                             {sharedFiles.map(file => (
-                                                <div key={file.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors group">
+                                                <div key={file.id} className="p-4 flex items-center justify-between hover:bg-surface-elevated transition-colors group">
                                                     <div className="flex items-center gap-3 overflow-hidden">
-                                                        <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                                                        <div className="p-2 rounded-lg bg-accent-blue/10 text-accent-blue">
                                                             <FileText className="w-5 h-5" />
                                                         </div>
                                                         <div className="min-w-0">
-                                                            <div className="font-medium truncate">{file.name}</div>
-                                                            <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                                            <div className="font-medium text-content truncate">{file.name}</div>
+                                                            <div className="text-xs text-content-muted flex items-center gap-2">
                                                                 <span className="truncate">{file.file_name}</span>
                                                                 <span>•</span>
                                                                 <span>Shared by {file.shared_by_username}</span>
@@ -426,7 +420,7 @@ export default function TeamsPage() {
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             onClick={() => handleDownloadFile(file)}
-                                                            className="p-2 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-lg transition-colors"
+                                                            className="p-2 hover:bg-accent-blue/10 text-content-muted hover:text-accent-blue rounded-lg transition-colors"
                                                             title="Download"
                                                         >
                                                             <Download className="w-4 h-4" />
@@ -434,7 +428,7 @@ export default function TeamsPage() {
                                                         {canShareFiles && (
                                                             <button
                                                                 onClick={() => handleRemoveSharedFile(file.id)}
-                                                                className="p-2 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-lg transition-colors"
+                                                                className="p-2 hover:bg-accent-red/10 text-content-muted hover:text-accent-red rounded-lg transition-colors"
                                                                 title="Remove Share"
                                                             >
                                                                 <Trash2 className="w-4 h-4" />
@@ -448,12 +442,12 @@ export default function TeamsPage() {
                                 </div>
                             </motion.div>
                         ) : (
-                            <div className="h-full flex flex-col items-center justify-center p-12 text-center bg-card/50 border border-white/5 rounded-xl border-dashed">
-                                <div className="w-24 h-24 bg-secondary/30 rounded-full flex items-center justify-center mb-6">
-                                    <Users className="w-10 h-10 text-muted-foreground opacity-50" />
+                            <div className="h-full flex flex-col items-center justify-center p-12 text-center card border-dashed">
+                                <div className="w-24 h-24 bg-surface-subtle rounded-full flex items-center justify-center mb-6">
+                                    <Users className="w-10 h-10 text-content-subtle opacity-50" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-2">Select a Team</h3>
-                                <p className="text-muted-foreground max-w-sm mx-auto mb-6">
+                                <h3 className="text-xl font-bold text-content mb-2">Select a Team</h3>
+                                <p className="text-content-muted max-w-sm mx-auto mb-6">
                                     Select a team from the sidebar to view members and shared files, or create a new team to get started.
                                 </p>
                                 <button onClick={() => setShowCreateModal(true)} className="btn-primary">
@@ -468,32 +462,33 @@ export default function TeamsPage() {
             {/* Create Team Modal */}
             <AnimatePresence>
                 {showCreateModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-                        onClick={() => setShowCreateModal(false)}
-                    >
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                         <motion.div
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            className="bg-card border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowCreateModal(false)}
+                            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-md bg-surface-elevated border border-surface-border rounded-2xl shadow-2xl overflow-hidden"
                             onClick={e => e.stopPropagation()}
                         >
-                            <div className="p-6 border-b border-white/10 flex justify-between items-center">
-                                <h2 className="text-xl font-bold">Create Team</h2>
-                                <button onClick={() => setShowCreateModal(false)} className="text-muted-foreground hover:text-foreground">
+                            <div className="p-6 border-b border-surface-border flex justify-between items-center">
+                                <h2 className="text-xl font-bold text-content">Create Team</h2>
+                                <button onClick={() => setShowCreateModal(false)} className="text-content-muted hover:text-content">
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
                             <form onSubmit={handleCreateTeam} className="p-6 space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-muted-foreground">Team Name</label>
+                                    <label className="text-sm font-medium text-content-muted">Team Name</label>
                                     <input
                                         type="text"
-                                        className="w-full bg-secondary/50 border border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                        className="input"
                                         value={newTeamName}
                                         onChange={(e) => setNewTeamName(e.target.value)}
                                         placeholder="e.g. Engineering"
@@ -501,56 +496,59 @@ export default function TeamsPage() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-muted-foreground">Description (optional)</label>
+                                    <label className="text-sm font-medium text-content-muted">Description (optional)</label>
                                     <input
                                         type="text"
-                                        className="w-full bg-secondary/50 border border-white/10 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                        className="input"
                                         value={newTeamDesc}
                                         onChange={(e) => setNewTeamDesc(e.target.value)}
-                                        placeholder="Brief checks..."
+                                        placeholder="Brief description..."
                                     />
                                 </div>
                                 <div className="flex gap-3 pt-2">
                                     <button
                                         type="button"
                                         onClick={() => setShowCreateModal(false)}
-                                        className="flex-1 btn-secondary"
+                                        className="btn-secondary flex-1"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="flex-1 btn-primary"
+                                        className="btn-primary flex-1"
                                     >
                                         Create Team
                                     </button>
                                 </div>
                             </form>
                         </motion.div>
-                    </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
 
             {/* Add Member Modal */}
             <AnimatePresence>
                 {isAddMemberModalOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-                    >
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsAddMemberModalOpen(false)}
+                            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                        />
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="w-full max-w-md bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-md bg-surface-elevated border border-surface-border rounded-2xl shadow-2xl overflow-hidden"
+                            onClick={e => e.stopPropagation()}
                         >
-                            <div className="p-6 border-b border-white/10 flex justify-between items-center">
-                                <h3 className="text-xl font-bold text-foreground">Add Team Member</h3>
+                            <div className="p-6 border-b border-surface-border flex justify-between items-center">
+                                <h3 className="text-xl font-bold text-content">Add Team Member</h3>
                                 <button
                                     onClick={() => setIsAddMemberModalOpen(false)}
-                                    className="p-2 text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-full transition-colors"
+                                    className="p-2 text-content-muted hover:text-content hover:bg-surface-subtle rounded-full transition-colors"
                                 >
                                     <X size={20} />
                                 </button>
@@ -558,34 +556,34 @@ export default function TeamsPage() {
 
                             <form onSubmit={handleAddMember} className="p-6 space-y-4">
                                 {modalError && (
-                                    <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium flex items-start gap-3">
+                                    <div className="p-4 rounded-xl bg-accent-red/10 border border-accent-red/20 text-accent-red text-sm font-medium flex items-start gap-3">
                                         <AlertTriangle size={20} className="shrink-0 mt-0.5" />
                                         <span>{modalError}</span>
                                     </div>
                                 )}
 
                                 <div>
-                                    <label className="block text-sm font-medium text-muted-foreground mb-1">
+                                    <label className="block text-sm font-medium text-content-muted mb-1">
                                         Username
                                     </label>
                                     <div className="relative">
-                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" size={18} />
                                         <input
                                             type="text"
                                             value={newMemberUsername}
                                             onChange={(e) => setNewMemberUsername(e.target.value)}
                                             placeholder="Enter username"
-                                            className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-white/10 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                                            className="input pl-10"
                                             autoFocus
                                         />
                                     </div>
                                 </div>
-                                <div className="mt-4 space-y-2">
-                                    <label className="text-sm font-medium text-muted-foreground">Role</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-content-muted">Role</label>
                                     <div className="relative">
-                                        <Settings className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                        <Settings className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-muted" />
                                         <select
-                                            className="w-full bg-secondary/50 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none text-foreground"
+                                            className="input pl-9 appearance-none"
                                             value={newMemberRole}
                                             onChange={(e) => setNewMemberRole(e.target.value)}
                                         >
@@ -599,46 +597,50 @@ export default function TeamsPage() {
                                     <button
                                         type="button"
                                         onClick={() => setIsAddMemberModalOpen(false)}
-                                        className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                        className="btn-secondary"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={!newMemberUsername}
-                                        className="px-6 py-2 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
+                                        className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Add Member
                                     </button>
                                 </div>
                             </form>
                         </motion.div>
-                    </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
 
+            {/* Remove Member Confirmation Modal */}
             <AnimatePresence>
                 {isRemoveMemberModalOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-                    >
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsRemoveMemberModalOpen(false)}
+                            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                        />
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="w-full max-w-md bg-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-md bg-surface-elevated border border-surface-border rounded-2xl shadow-2xl overflow-hidden"
+                            onClick={e => e.stopPropagation()}
                         >
                             <div className="p-6">
                                 <div className="flex items-center space-x-4 mb-4">
-                                    <div className="p-3 bg-red-500/10 rounded-full">
-                                        <AlertTriangle size={24} className="text-red-500" />
+                                    <div className="p-3 bg-accent-red/10 rounded-full">
+                                        <AlertTriangle size={24} className="text-accent-red" />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-bold text-foreground">Remove Member</h3>
-                                        <p className="text-muted-foreground text-sm mt-1">
+                                        <h3 className="text-xl font-bold text-content">Remove Member</h3>
+                                        <p className="text-content-muted text-sm mt-1">
                                             Are you sure you want to remove this member from the team?
                                         </p>
                                     </div>
@@ -647,58 +649,59 @@ export default function TeamsPage() {
                                 <div className="flex items-center justify-end space-x-3 mt-6">
                                     <button
                                         onClick={() => setIsRemoveMemberModalOpen(false)}
-                                        className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                        className="btn-secondary"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={confirmRemoveMember}
-                                        className="px-6 py-2 bg-destructive text-destructive-foreground font-bold rounded-lg hover:bg-destructive/90 transition-colors shadow-lg shadow-destructive/20"
+                                        className="inline-flex items-center gap-2 px-4 py-2 font-bold rounded-lg bg-accent-red text-white hover:bg-accent-red/90 transition-colors"
                                     >
                                         Remove Member
                                     </button>
                                 </div>
                             </div>
                         </motion.div>
-                    </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
 
             {/* Share File Modal */}
             <AnimatePresence>
                 {showShareModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-                        onClick={() => setShowShareModal(false)}
-                    >
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                         <motion.div
-                            initial={{ scale: 0.95, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.95, opacity: 0 }}
-                            className="bg-card border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowShareModal(false)}
+                            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-md bg-surface-elevated border border-surface-border rounded-2xl shadow-2xl overflow-hidden"
                             onClick={e => e.stopPropagation()}
                         >
-                            <div className="p-6 border-b border-white/10 flex justify-between items-center">
-                                <h2 className="text-xl font-bold">Share File</h2>
-                                <button onClick={() => setShowShareModal(false)} className="text-muted-foreground hover:text-foreground">
+                            <div className="p-6 border-b border-surface-border flex justify-between items-center">
+                                <h2 className="text-xl font-bold text-content">Share File</h2>
+                                <button onClick={() => setShowShareModal(false)} className="text-content-muted hover:text-content">
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
                             <form onSubmit={handleShareFile} className="p-6 space-y-4">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-muted-foreground">Select File</label>
+                                    <label className="text-sm font-medium text-content-muted">Select File</label>
                                     {myFiles.length === 0 ? (
-                                        <div className="p-4 rounded-xl bg-secondary/50 text-center text-sm text-muted-foreground">
+                                        <div className="p-4 rounded-xl bg-surface-subtle text-center text-sm text-content-muted">
                                             You have no files in your vault. Upload files first.
                                         </div>
                                     ) : (
                                         <div className="relative">
-                                            <File className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                            <File className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-muted" />
                                             <select
-                                                className="w-full bg-secondary/50 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none"
+                                                className="input pl-9 appearance-none"
                                                 value={selectedFileToShare}
                                                 onChange={(e) => setSelectedFileToShare(e.target.value)}
                                                 required
@@ -715,13 +718,13 @@ export default function TeamsPage() {
                                     <button
                                         type="button"
                                         onClick={() => setShowShareModal(false)}
-                                        className="flex-1 btn-secondary"
+                                        className="btn-secondary flex-1"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="flex-1 btn-primary"
+                                        className="btn-primary flex-1"
                                         disabled={myFiles.length === 0}
                                     >
                                         Share File
@@ -729,7 +732,7 @@ export default function TeamsPage() {
                                 </div>
                             </form>
                         </motion.div>
-                    </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </div>

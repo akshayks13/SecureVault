@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Shield, Github, Twitter, Linkedin, Heart } from 'lucide-react';
+import { Shield, Github, Twitter, Linkedin } from 'lucide-react';
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
@@ -27,22 +27,21 @@ export default function Footer() {
     };
 
     return (
-        <footer className="border-t border-white/10 bg-background pt-16 pb-8">
+        <footer className="border-t border-surface-subtle bg-surface pt-14 pb-8">
             <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
                     {/* Brand Column */}
                     <div className="space-y-4">
-                        <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
-                            <Shield className="w-8 h-8 text-blue-500" />
-                            <span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
-                                SecureVault
-                            </span>
+                        <Link href="/" className="flex items-center gap-2.5 font-semibold text-lg">
+                            <div className="w-8 h-8 rounded-lg bg-accent-blue flex items-center justify-center">
+                                <Shield className="w-4.5 h-4.5 text-content" />
+                            </div>
+                            <span className="text-content">SecureVault</span>
                         </Link>
-                        <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
+                        <p className="text-content-muted text-sm leading-relaxed max-w-xs">
                             Military-grade encryption for your most sensitive data.
-                            Built for individuals and teams who refuse to compromise on security.
                         </p>
-                        <div className="flex gap-4 pt-2">
+                        <div className="flex gap-2 pt-1">
                             <SocialLink href="#" icon={Github} label="GitHub" />
                             <SocialLink href="#" icon={Twitter} label="Twitter" />
                             <SocialLink href="#" icon={Linkedin} label="LinkedIn" />
@@ -51,14 +50,14 @@ export default function Footer() {
 
                     {/* Links Columns */}
                     {Object.entries(footerLinks).map(([category, links]) => (
-                        <div key={category} className="space-y-4">
-                            <h3 className="font-semibold text-foreground tracking-wide">{category}</h3>
+                        <div key={category} className="space-y-3">
+                            <h3 className="font-medium text-content text-sm">{category}</h3>
                             <ul className="space-y-2">
                                 {links.map((link) => (
                                     <li key={link.name}>
                                         <Link
                                             href={link.href}
-                                            className="text-sm text-muted-foreground hover:text-blue-400 transition-colors"
+                                            className="text-sm text-content-muted hover:text-accent-blue transition-colors"
                                         >
                                             {link.name}
                                         </Link>
@@ -70,13 +69,8 @@ export default function Footer() {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-                    <p>© {currentYear} SecureVault Inc. All rights reserved.</p>
-                    <div className="flex items-center gap-1">
-                        <span>Made with</span>
-                        <Heart className="w-4 h-4 text-red-500 fill-red-500" />
-                        <span>for a more secure web.</span>
-                    </div>
+                <div className="border-t border-surface-subtle pt-6 text-center text-sm text-content-subtle">
+                    <p>© {currentYear} SecureVault. All rights reserved.</p>
                 </div>
             </div>
         </footer>
@@ -88,7 +82,7 @@ function SocialLink({ href, icon: Icon, label }) {
         <a
             href={href}
             aria-label={label}
-            className="p-2 rounded-full bg-white/5 hover:bg-blue-500/10 hover:text-blue-400 text-muted-foreground transition-all border border-white/10 hover:border-blue-500/50"
+            className="p-2.5 rounded-full bg-surface-subtle text-content-muted hover:text-accent-blue transition-all border border-surface-border hover:border-accent-blue/30"
         >
             <Icon className="w-4 h-4" />
         </a>

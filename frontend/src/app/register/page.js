@@ -34,7 +34,6 @@ export default function RegisterPage() {
 
         try {
             await register(username, password);
-            // After registration, redirect to OTP verification
             router.push('/verify-otp');
         } catch (err) {
             setError(err.response?.data?.detail || 'Registration failed. Please try again.');
@@ -44,40 +43,46 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-background">
-            {/* Background Effects */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-4xl -z-10 opacity-20 pointer-events-none">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500 rounded-full blur-[100px]" />
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500 rounded-full blur-[100px]" />
-            </div>
-
+        <div className="min-h-screen flex items-center justify-center p-4 bg-surface">
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className="w-full max-w-md bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="w-full max-w-md"
             >
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold mb-2 tracking-tight">Create Account</h1>
-                    <p className="text-muted-foreground">Secure your digital assets today</p>
+                {/* Logo */}
+                <div className="text-center mb-10">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-green/10 mb-6">
+                        <ShieldCheck className="w-8 h-8 text-accent-green" />
+                    </div>
+                    <h1 className="text-2xl font-semibold text-content mb-2">Create account</h1>
+                    <p className="text-content-muted text-sm">Secure your digital assets with SecureVault</p>
                 </div>
 
+                {/* Error Alert */}
                 {error && (
-                    <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive flex items-center gap-3">
-                        <AlertCircle className="w-5 h-5 shrink-0" />
-                        <p className="text-sm font-medium">{error}</p>
-                    </div>
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-6 p-4 rounded-xl bg-accent-red/10 border border-accent-red/20 flex items-center gap-3"
+                    >
+                        <AlertCircle className="w-5 h-5 text-accent-red shrink-0" />
+                        <p className="text-sm text-accent-red">{error}</p>
+                    </motion.div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground" htmlFor="username">Username</label>
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-content-muted mb-2" htmlFor="username">
+                            Username
+                        </label>
                         <div className="relative">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-content-subtle" />
                             <input
                                 id="username"
                                 type="text"
-                                className="w-full bg-secondary/50 border border-white/10 rounded-lg pl-10 pr-4 py-3 placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                className="input pl-12"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 placeholder="Choose a username"
@@ -86,14 +91,16 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground" htmlFor="password">Password</label>
+                    <div>
+                        <label className="block text-sm font-medium text-content-muted mb-2" htmlFor="password">
+                            Password
+                        </label>
                         <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-content-subtle" />
                             <input
                                 id="password"
                                 type="password"
-                                className="w-full bg-secondary/50 border border-white/10 rounded-lg pl-10 pr-4 py-3 placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                className="input pl-12"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="At least 8 characters"
@@ -103,14 +110,16 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium text-muted-foreground" htmlFor="confirmPassword">Confirm Password</label>
+                    <div>
+                        <label className="block text-sm font-medium text-content-muted mb-2" htmlFor="confirmPassword">
+                            Confirm Password
+                        </label>
                         <div className="relative">
-                            <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                            <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-content-subtle" />
                             <input
                                 id="confirmPassword"
                                 type="password"
-                                className="w-full bg-secondary/50 border border-white/10 rounded-lg pl-10 pr-4 py-3 placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                                className="input pl-12"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 placeholder="Confirm your password"
@@ -121,22 +130,26 @@ export default function RegisterPage() {
 
                     <button
                         type="submit"
-                        className="w-full bg-primary text-primary-foreground font-semibold rounded-lg py-3 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="btn-primary w-full mt-6"
                         disabled={loading}
                     >
                         {loading ? (
                             <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
                             <>
-                                Register
+                                Create account
                                 <ArrowRight className="w-4 h-4" />
                             </>
                         )}
                     </button>
                 </form>
 
-                <p className="text-center mt-8 text-sm text-muted-foreground">
-                    Already have an account? <Link href="/login" className="text-primary hover:text-primary/80 font-medium transition-colors">Login</Link>
+                {/* Footer */}
+                <p className="text-center mt-8 text-sm text-content-muted">
+                    Already have an account?{' '}
+                    <Link href="/login" className="text-accent-blue hover:text-accent-blue-hover font-medium transition-colors">
+                        Sign in
+                    </Link>
                 </p>
             </motion.div>
         </div>

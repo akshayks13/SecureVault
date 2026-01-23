@@ -15,7 +15,6 @@ export default function PasswordStrengthMeter({ password, onChange }) {
             return;
         }
 
-        // Calculate strength locally for instant feedback
         const result = calculateStrength(password);
         setStrength(result);
     }, [password]);
@@ -77,27 +76,32 @@ export default function PasswordStrengthMeter({ password, onChange }) {
 
     const getColor = () => {
         switch (strength.level) {
-            case 'strong': return 'bg-emerald-500';
+            case 'strong': return 'bg-accent-green';
             case 'good': return 'bg-green-500';
-            case 'fair': return 'bg-yellow-500';
-            default: return 'bg-red-500';
+            case 'fair': return 'bg-accent-yellow';
+            default: return 'bg-accent-red';
+        }
+    };
+
+    const getTextColor = () => {
+        switch (strength.level) {
+            case 'strong': return 'text-accent-green';
+            case 'good': return 'text-green-500';
+            case 'fair': return 'text-accent-yellow';
+            default: return 'text-accent-red';
         }
     };
 
     return (
         <div className="mt-2 text-xs">
             <div className="flex justify-between items-end mb-1">
-                <span className={`capitalize font-medium ${strength.level === 'strong' ? 'text-emerald-500' :
-                        strength.level === 'good' ? 'text-green-500' :
-                            strength.level === 'fair' ? 'text-yellow-500' :
-                                'text-red-500'
-                    }`}>
+                <span className={`capitalize font-medium ${getTextColor()}`}>
                     {strength.level}
                 </span>
-                <span className="text-muted-foreground">{strength.score}%</span>
+                <span className="text-content-muted">{strength.score}%</span>
             </div>
 
-            <div className="h-1 w-full bg-secondary rounded-full overflow-hidden mb-2">
+            <div className="h-1 w-full bg-surface-subtle rounded-full overflow-hidden mb-2">
                 <div
                     className={`h-full transition-all duration-300 ${getColor()}`}
                     style={{ width: `${strength.score}%` }}
@@ -105,7 +109,7 @@ export default function PasswordStrengthMeter({ password, onChange }) {
             </div>
 
             {strength.feedback.length > 0 && strength.level !== 'strong' && (
-                <div className="space-y-0.5 text-muted-foreground">
+                <div className="space-y-0.5 text-content-muted">
                     {strength.feedback.slice(0, 1).map((tip, i) => (
                         <div key={i} className="flex items-center gap-1">
                             <span>• {tip}</span>
