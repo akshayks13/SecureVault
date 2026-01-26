@@ -164,26 +164,6 @@ Tracks files shared with teams.
 
 ---
 
-## Indexes
-
-```sql
--- Fast user lookup
-CREATE UNIQUE INDEX idx_users_username ON users(username);
-
--- Fast vault item queries by user
-CREATE INDEX idx_vault_items_user_id ON vault_items(user_id);
-CREATE INDEX idx_vault_items_user_type ON vault_items(user_id, type);
-
--- Fast team member queries
-CREATE INDEX idx_team_members_team ON team_members(team_id);
-CREATE INDEX idx_team_members_user ON team_members(user_id);
-
--- Fast shared file queries
-CREATE INDEX idx_shared_files_team ON shared_files(team_id);
-```
-
----
-
 ## Security Considerations
 
 1. **No plaintext storage**: All sensitive data in `vault_items` is encrypted

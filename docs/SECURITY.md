@@ -186,9 +186,17 @@ flowchart LR
 
 ---
 
-## Complete Data Flow
+## Vault Data Flow (Passwords, Files, Notes)
 
-### Storing a Password
+All vault items (passwords, files, notes) use the **same encryption process**:
+
+| Item Type | Data Stored |
+|-----------|-------------|
+| Password | JSON: `{"website", "username", "password"}` |
+| Note | JSON: `{"title", "content"}` |
+| File | Raw binary content |
+
+### Storing Data
 
 ```mermaid
 sequenceDiagram
@@ -198,8 +206,8 @@ sequenceDiagram
     participant Crypto
     participant Database
     
-    User->>Frontend: Enter password details
-    Frontend->>Backend: POST /vault/passwords
+    User->>Frontend: Submit data (password/file/note)
+    Frontend->>Backend: POST /vault/{type}
     Backend->>Crypto: Generate AES key (32 bytes)
     Backend->>Crypto: Generate IV (12 bytes)
     Backend->>Crypto: Encrypt with AES-256-GCM
@@ -207,12 +215,10 @@ sequenceDiagram
     Backend->>Crypto: Sign hash with RSA private key
     Backend->>Crypto: Base64 encode all binary data
     Backend->>Database: Store encrypted data + key + iv + hash + signature
-    Database-->>Backend: Success
-    Backend-->>Frontend: Password stored
-    Frontend-->>User: Confirmation
+    Backend-->>Frontend: Success
 ```
 
-### Retrieving a Password
+### Retrieving Data
 
 ```mermaid
 sequenceDiagram
@@ -222,53 +228,77 @@ sequenceDiagram
     participant Crypto
     participant Database
     
-    User->>Frontend: Request passwords
-    Frontend->>Backend: GET /vault/passwords (with JWT)
+    User->>Frontend: Request data
+    Frontend->>Backend: GET /vault/{type} (with JWT)
     Backend->>Backend: Verify JWT token
-    Backend->>Database: Fetch user's encrypted passwords
+    Backend->>Database: Fetch user's encrypted items
     Database-->>Backend: Encrypted data
     Backend->>Crypto: Base64 decode
     Backend->>Crypto: Decrypt with AES-256-GCM
-    Backend->>Crypto: Compute SHA-256 of decrypted data
-    Backend->>Crypto: Verify hash matches stored hash
-    Backend->>Crypto: Verify RSA signature
-    Backend-->>Frontend: Decrypted passwords
-    Frontend-->>User: Display passwords
+    Backend->>Crypto: Verify hash + signature
+    Backend-->>Frontend: Decrypted data
 ```
 
 ---
 
 ## Authentication Flow
 
+### Registration
+
 ```mermaid
 sequenceDiagram
     participant User
-    participant Frontend
     participant Backend
     participant Database
     
-    Note over User,Database: Registration
-    User->>Frontend: Username + Password
-    Frontend->>Backend: POST /auth/register
-    Backend->>Backend: bcrypt hash password
+    User->>Backend: POST /auth/register (username + password)
+    Backend->>Backend: Hash password with bcrypt
     Backend->>Database: Store user with hashed password
-    
-    Note over User,Database: Login
-    User->>Frontend: Username + Password
-    Frontend->>Backend: POST /auth/login
-    Backend->>Database: Fetch user
-    Backend->>Backend: bcrypt verify password
-    Backend->>Backend: Generate 6-digit OTP
-    Backend-->>Frontend: OTP required
-    
-    Note over User,Database: OTP Verification
-    User->>Frontend: Enter OTP
-    Frontend->>Backend: POST /auth/verify-otp
-    Backend->>Backend: Verify OTP (5 min validity)
-    Backend->>Backend: Generate JWT token
-    Backend-->>Frontend: JWT token
-    Frontend->>Frontend: Store token in localStorage
+    Backend-->>User: Registration successful
 ```
+
+### Login + OTP Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Browser
+    participant Backend
+    participant Database
+    
+    Note over User,Database: Step 1 - Login
+    User->>Backend: POST /auth/login (username + password)
+    Backend->>Database: Fetch user
+    Backend->>Backend: Verify password with bcrypt
+    Backend->>Backend: Generate 6-digit OTP
+    Backend->>Database: Store OTP + timestamp in user record
+    Backend-->>Browser: "OTP required"
+    Browser->>Browser: Store username in React state
+    Browser->>Browser: Redirect to /verify-otp page
+    
+    Note over User,Database: Step 2 - Waiting Period
+    Note over Browser: Username in browser memory
+    Note over Database: OTP in users.otp_secret
+    User->>User: Views OTP in backend console
+    
+    Note over User,Database: Step 3 - OTP Verification
+    User->>Backend: POST /auth/verify-otp (username + OTP)
+    Backend->>Database: Fetch stored OTP
+    Backend->>Backend: Check OTP matches
+    Backend->>Backend: Check within 5 minutes
+    Backend->>Database: Clear OTP (one-time use)
+    Backend->>Backend: Generate JWT token
+    Backend-->>Browser: JWT token
+    Browser->>Browser: Store JWT in localStorage
+```
+
+**Where data is stored during OTP wait:**
+
+| Data | Location | Duration |
+|------|----------|----------|
+| Username | Browser memory (React state) | Until OTP verified |
+| OTP code | Database `users.otp_secret` | 5 minutes max |
+| OTP timestamp | Database `users.otp_created_at` | Until next login |
 
 ---
 
