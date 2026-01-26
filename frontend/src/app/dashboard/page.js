@@ -6,12 +6,12 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { vaultAPI } from '@/lib/api';
 import Navbar from '@/components/Navbar';
-import { Key, FolderLock, ShieldCheck, Binary, Loader2, FileText, ArrowRight } from 'lucide-react';
+import { Key, FolderLock, ShieldCheck, Loader2, FileText, ArrowRight, StickyNote, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function DashboardPage() {
     const { user, loading, isAuthenticated } = useAuth();
-    const [stats, setStats] = useState({ passwords: 0, files: 0 });
+    const [stats, setStats] = useState({ passwords: 0, files: 0, notes: 0 });
     const [recentItems, setRecentItems] = useState([]);
     const router = useRouter();
 
@@ -29,19 +29,22 @@ export default function DashboardPage() {
 
     const fetchData = async () => {
         try {
-            const [passwordsRes, filesRes] = await Promise.all([
+            const [passwordsRes, filesRes, notesRes] = await Promise.all([
                 vaultAPI.getPasswords(),
-                vaultAPI.getFiles()
+                vaultAPI.getFiles(),
+                vaultAPI.getNotes()
             ]);
 
             setStats({
                 passwords: passwordsRes.data.length,
-                files: filesRes.data.length
+                files: filesRes.data.length,
+                notes: notesRes.data.length
             });
 
             const allItems = [
                 ...passwordsRes.data.map(p => ({ ...p, type: 'password' })),
-                ...filesRes.data.map(f => ({ ...f, type: 'file' }))
+                ...filesRes.data.map(f => ({ ...f, type: 'file' })),
+                ...notesRes.data.map(n => ({ ...n, type: 'note' }))
             ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
 
             setRecentItems(allItems);
@@ -123,24 +126,30 @@ export default function DashboardPage() {
                         </motion.div>
                     </Link>
 
-                    <motion.div variants={itemVariants} className="card p-5">
-                        <div className="mb-4">
-                            <div className="icon-container icon-green">
-                                <ShieldCheck className="w-5 h-5" />
+                    <Link href="/vault/notes" className="block">
+                        <motion.div
+                            variants={itemVariants}
+                            className="card card-hover p-5 cursor-pointer group"
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="icon-container icon-purple">
+                                    <StickyNote className="w-5 h-5" />
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-content-subtle opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-2 group-hover:translate-x-0" />
                             </div>
-                        </div>
-                        <div className="text-xl font-semibold text-content mb-1">AES-256</div>
-                        <div className="text-sm text-content-muted">Encryption Standard</div>
-                    </motion.div>
+                            <div className="text-3xl font-semibold text-content mb-1">{stats.notes}</div>
+                            <div className="text-sm text-content-muted">Secure Notes</div>
+                        </motion.div>
+                    </Link>
 
                     <motion.div variants={itemVariants} className="card p-5">
-                        <div className="mb-4">
-                            <div className="icon-container icon-purple">
-                                <Binary className="w-5 h-5" />
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="icon-container icon-green">
+                                <Lock className="w-5 h-5" />
                             </div>
                         </div>
-                        <div className="text-xl font-semibold text-content mb-1">RSA-2048</div>
-                        <div className="text-sm text-content-muted">Digital Signatures</div>
+                        <div className="text-xl font-semibold text-content mb-1">Secured</div>
+                        <div className="text-sm text-content-muted">AES-256 • RSA-2048</div>
                     </motion.div>
                 </motion.div>
 
@@ -176,21 +185,21 @@ export default function DashboardPage() {
                                     <div className="flex items-center gap-4">
                                         <div className={cn(
                                             "icon-container",
-                                            item.type === 'password' ? 'icon-blue' : 'icon-yellow'
+                                            item.type === 'password' ? 'icon-blue' : item.type === 'note' ? 'icon-purple' : 'icon-yellow'
                                         )}>
-                                            {item.type === 'password' ? <Key className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
+                                            {item.type === 'password' ? <Key className="w-5 h-5" /> : item.type === 'note' ? <StickyNote className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
                                         </div>
                                         <div>
-                                            <div className="font-medium text-content group-hover:text-accent-blue transition-colors">{item.name}</div>
+                                            <div className="font-medium text-content group-hover:text-accent-blue transition-colors">{item.name || item.title}</div>
                                             <div className="text-xs text-content-subtle flex items-center gap-2">
-                                                <span className="capitalize">{item.type === 'password' ? 'Password' : item.file_name}</span>
+                                                <span className="capitalize">{item.type === 'password' ? 'Password' : item.type === 'note' ? 'Note' : item.file_name}</span>
                                                 <span>•</span>
                                                 <span>{new Date(item.created_at).toLocaleDateString()}</span>
                                             </div>
                                         </div>
                                     </div>
                                     <Link
-                                        href={item.type === 'password' ? '/vault/passwords' : '/vault/files'}
+                                        href={item.type === 'password' ? '/vault/passwords' : item.type === 'note' ? '/vault/notes' : '/vault/files'}
                                         className="btn-secondary px-4 py-1.5 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
                                         View
