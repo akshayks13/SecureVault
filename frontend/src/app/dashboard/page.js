@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { vaultAPI } from '@/lib/api';
 import Navbar from '@/components/Navbar';
-import { Key, FolderLock, ShieldCheck, Loader2, FileText, ArrowRight, StickyNote, Lock } from 'lucide-react';
+import { Key, FolderLock, Loader2, FileText, ArrowRight, StickyNote, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function DashboardPage() {

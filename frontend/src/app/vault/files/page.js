@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { vaultAPI } from '@/lib/api';
 import Navbar from '@/components/Navbar';
-import { Search, Plus, FileText, Download, Eye, ShieldCheck, Trash2, X, UploadCloud, Loader2, File, Image as ImageIcon, FileCode } from 'lucide-react';
+import { Search, FileText, Download, Eye, ShieldCheck, Trash2, X, UploadCloud, Loader2, File, Image as ImageIcon, FileCode } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FilesPage() {

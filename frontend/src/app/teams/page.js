@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { teamsAPI, vaultAPI } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Users, FileText, Settings, X, Search, Shield, UserPlus, FileUp, MoreVertical, Check, Folder, AlertTriangle, Info, Download, Share2, File, Loader2, User } from 'lucide-react';
+import { Plus, Trash2, Users, FileText, Settings, X, UserPlus, AlertTriangle, Download, Share2, File, Loader2, User } from 'lucide-react';
 
 export default function TeamsPage() {
     const { loading: authLoading, isAuthenticated } = useAuth();
