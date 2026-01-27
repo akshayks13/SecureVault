@@ -56,6 +56,19 @@ class IntegrityResponse(BaseModel):
     message: str
 
 
+# Note Models
+class NoteStoreRequest(BaseModel):
+    title: str
+    content: str
+
+
+class NoteResponse(BaseModel):
+    id: int
+    title: str
+    content: str
+    created_at: str
+
+
 # Helper functions
 def encrypt_and_store(data: bytes) -> tuple[str, str, str, str, str]:
     """
@@ -494,19 +507,6 @@ async def list_all_items(
         )
         for item in items
     ]
-
-
-# Note Models
-class NoteStoreRequest(BaseModel):
-    title: str
-    content: str
-
-
-class NoteResponse(BaseModel):
-    id: int
-    title: str
-    content: str
-    created_at: str
 
 
 # Note Routes
