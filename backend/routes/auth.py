@@ -48,6 +48,17 @@ class MessageResponse(BaseModel):
     message: str
 
 
+# Forgot Password Models
+class ForgotPasswordRequest(BaseModel):
+    username: str
+
+
+class ResetPasswordRequest(BaseModel):
+    username: str
+    reset_token: str
+    new_password: str
+
+
 # Routes
 @router.post("/register", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
 async def register(request: RegisterRequest, db: Session = Depends(get_db)):
@@ -172,17 +183,6 @@ async def get_me(current_user: User = Depends(get_current_user)):
     - Returns user details
     """
     return current_user
-
-
-# Forgot Password Models
-class ForgotPasswordRequest(BaseModel):
-    username: str
-
-
-class ResetPasswordRequest(BaseModel):
-    username: str
-    reset_token: str
-    new_password: str
 
 
 @router.post("/forgot-password", response_model=MessageResponse)

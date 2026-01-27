@@ -260,7 +260,7 @@ async def share_file_with_team(
     db: Session = Depends(get_db)
 ):
     """
-    Share a FILE with the team (not passwords).
+    Share a FILE with the team.
     Only OWNER and ADMIN can share files.
     """
     # Verify user is owner or admin
@@ -275,7 +275,7 @@ async def share_file_with_team(
     if membership.role not in [TeamRole.OWNER.value, TeamRole.ADMIN.value]:
         raise HTTPException(status_code=403, detail="Only owner or admin can share files")
     
-    # Get the vault item - must be a FILE
+    # Get the vault item
     vault_item = db.query(VaultItem).filter(
         VaultItem.id == request.vault_item_id,
         VaultItem.user_id == current_user.id,
