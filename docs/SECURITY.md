@@ -134,7 +134,7 @@ flowchart LR
 
 **What it does:** Proves data originated from this server and hasn't been tampered.
 
-**Why RSA-PSS (not PKCS#1 v1.5)?**
+**Why RSA-PSS ?**
 - PSS (Probabilistic Signature Scheme) is more secure
 - Resistant to known padding attacks
 - Same message signed twice produces different signatures (added randomness)
