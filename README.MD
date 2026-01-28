@@ -163,7 +163,6 @@ Frontend runs at: `http://localhost:3000`
 - python-jose - JWT handling
 - passlib - Password hashing (bcrypt)
 - cryptography - AES and RSA operations
-- pyotp - OTP generation
 
 ### Frontend
 - Next.js 16 - React framework
@@ -178,3 +177,13 @@ Frontend runs at: `http://localhost:3000`
 - bcrypt - Password hashing
 - SHA-256 - Integrity hashing
 - Base64 - Binary encoding
+
+## Documentation
+
+- [Project Documentation Index](docs/README.md)
+- [Security Architecture](docs/SECURITY.md)
+- [Security Evaluation Rubric](docs/EVALUATION.md)
+- [API Reference](docs/API.md)
+- [Database Schema](docs/DATABASE.md)
+- [Frontend Guide](docs/FRONTEND.md)
+
